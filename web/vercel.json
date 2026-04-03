@@ -2,8 +2,6 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/app", "destination": "/app.html" },
-    { "source": "/why-knitwise", "destination": "/why-knitwise.html" },
-    { "source": "/why-knitwise/", "destination": "/why-knitwise.html" },
     { "source": "/(.*)", "destination": "/landing.html" }
   ]
 }
