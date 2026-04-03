@@ -6,11 +6,6 @@
   "description": "KnitWise — Interactive knitting pattern reader",
   "scripts": {
     "dev": "vercel dev",
-    "deploy": "vercel --prod",
-    "test": "vitest run"
-  },
-  "devDependencies": {
-    "jsdom": "^26.0.0",
-    "vitest": "^3.0.0"
+    "deploy": "vercel --prod"
   }
 }

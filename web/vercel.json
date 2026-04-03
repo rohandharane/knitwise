@@ -1,9 +1,5 @@
 {
-  "functions": {
-    "api/chat.js": {
-      "maxDuration": 300
-    }
-  },
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/app", "destination": "/app.html" },
