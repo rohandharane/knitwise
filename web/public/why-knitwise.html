@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f4f0">
+<title>Why KnitWise? — KnitWise</title>
+<meta name="description" content="How knitting patterns create cognitive load—and how KnitWise is designed to help with steps, context, and re-entry.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:            #f4f4f0;
+  --surface:       #ffffff;
+  --border-card:   #edeae3;
+  --icon-tile:     #f3f1ec;
+  --text:          #0c0c09;
+  --text-body:     #2b2b22;
+  --text-muted:    #5b5b4b;
+  --text-faint:    rgba(0,0,0,0.40);
+  --accent:        #ffa81d;
+  --nav-pill-bg:   rgba(255,255,255,0.85);
+  --nav-border:    rgba(0,0,0,0.05);
+  --nav-shadow:    0 25px 50px -12px rgba(0,0,0,0.05);
+  --label-color:   #7a7a6c;
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body:    'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --ease-out:     cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out:  cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-fast:  160ms;
+  --motion-base:  220ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:            #121210;
+    --surface:       #1a1a17;
+    --border-card:   #2a2a26;
+    --icon-tile:     #252522;
+    --text:          #f4f4f0;
+    --text-body:     #c4c4bc;
+    --text-muted:    #9a9a8f;
+    --text-faint:    rgba(255,255,255,0.40);
+    --nav-pill-bg:   rgba(30,30,28,0.88);
+    --nav-border:    rgba(255,255,255,0.08);
+    --nav-shadow:    0 25px 50px -12px rgba(0,0,0,0.4);
+    --label-color:   #8a8a7e;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 300;
+  padding: 12px 20px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 500;
+  border-radius: 8px;
+}
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+}
+
+/* ─── NAV ─── */
+.nav-wrap {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: calc(100% - 32px);
+  max-width: 360px;
+}
+
+.nav-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 9px 9px 17px;
+  border-radius: 9999px;
+  background: var(--nav-pill-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--nav-border);
+  box-shadow: var(--nav-shadow);
+  transition: box-shadow var(--motion-base) var(--ease-out);
+}
+.nav-pill.scrolled {
+  box-shadow: 0 12px 40px -8px rgba(0,0,0,0.08);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  line-height: 28px;
+  color: var(--text);
+  padding-left: 8px;
+}
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: transform var(--motion-fast) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+}
+.nav-cta:active { transform: scale(0.97); }
+@media (prefers-color-scheme: dark) {
+  .nav-cta { background: #fff; color: #000; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .nav-cta:hover { opacity: 0.92; }
+}
+.nav-cta span { display: inline-block; transition: transform var(--motion-base) var(--ease-out); margin-left: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .nav-cta:hover span { transform: translateX(3px); }
+}
+
+/* ─── ARTICLE ─── */
+.wk-page {
+  padding: 120px 24px 0;
+  max-width: 720px;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .wk-page { padding-top: 140px; }
+}
+
+.wk-hero-label {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--label-color);
+  margin-bottom: 16px;
+}
+
+.wk-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-align: center;
+}
+
+.wk-lead {
+  margin-top: 24px;
+  font-size: clamp(17px, 2.2vw, 19px);
+  line-height: 1.65;
+  color: var(--text-body);
+  text-align: center;
+}
+
+.wk-block {
+  margin-top: 56px;
+}
+.wk-block:first-of-type { margin-top: 48px; }
+
+.wk-block h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.wk-block h3 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-top: 22px;
+  margin-bottom: 10px;
+}
+
+.wk-block p, .wk-block li {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text-body);
+}
+
+.wk-block p + p { margin-top: 14px; }
+
+.wk-block ul {
+  margin-top: 12px;
+  padding-left: 1.25em;
+}
+.wk-block li + li { margin-top: 8px; }
+
+.section-divider {
+  width: 1px;
+  height: 64px;
+  margin: 48px auto;
+  background: linear-gradient(to bottom, transparent, var(--border-card), transparent);
+  transform-origin: top center;
+}
+
+/* ─── TABLE ─── */
+.tensions-wrap {
+  margin-top: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--border-card);
+  background: var(--surface);
+}
+
+.tensions-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.tensions-table th,
+.tensions-table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-card);
+}
+.tensions-table tr:last-child th,
+.tensions-table tr:last-child td {
+  border-bottom: none;
+}
+.tensions-table th {
+  font-weight: 600;
+  color: var(--text);
+  width: 28%;
+}
+.tensions-table td {
+  color: var(--text-body);
+  line-height: 1.5;
+}
+
+/* ─── HOW KNITWISE ─── */
+.how-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.how-card {
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  padding: 22px 20px;
+}
+.how-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.how-card p {
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+  color: var(--text-body);
+}
+
+/* ─── REFERENCES ─── */
+.ref-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+}
+.ref-list li {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-body);
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+  margin-top: 12px;
+}
+.ref-list a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ref-list a:hover { color: var(--accent); }
+}
+
+/* ─── FINAL CTA ─── */
+.final-cta {
+  text-align: center;
+  padding: 48px 24px 0;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.final-cta h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  color: var(--text);
+  margin-bottom: 22px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: transform var(--motion-fast) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+}
+@media (prefers-color-scheme: dark) {
+  .btn-primary { background: #fff; color: #000; }
+}
+.btn-primary:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover { opacity: 0.88; }
+}
+.btn-primary .arrow { transition: transform var(--motion-base) var(--ease-out); display: inline-block; }
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover .arrow { transform: translateX(4px); }
+}
+
+/* ─── FOOTER ─── */
+.footer-zone {
+  position: relative;
+  padding: 80px 24px 80px;
+  overflow: hidden;
+  text-align: center;
+}
+.footer-tagline {
+  position: relative;
+  z-index: 2;
+  font-size: 16px;
+  color: var(--text-faint);
+  letter-spacing: 0.01em;
+}
+.footer-tagline a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .footer-tagline a:hover { color: var(--accent); }
+}
+.footer-watermark {
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 16vw, 10rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(185,185,185,0.10) 40%, transparent 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  user-select: none;
+  pointer-events: none;
+}
+@media (prefers-color-scheme: dark) {
+  .footer-watermark {
+    background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(120,120,120,0.06) 45%, transparent 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+.footer-beta {
+  position: relative;
+  z-index: 2;
+  margin-top: 24px;
+}
+.footer-beta-pill {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--label-color);
+  border: 1px solid var(--border-card);
+  border-radius: 9999px;
+  padding: 5px 14px;
+}
+.footer-meta {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+}
+.footer-meta a.footer-credit {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-decoration-color: rgba(0,0,0,0.15);
+  text-underline-offset: 3px;
+  transition: color var(--motion-fast) var(--ease-out), text-decoration-color var(--motion-fast) var(--ease-out);
+}
+@media (prefers-color-scheme: dark) {
+  .footer-meta a.footer-credit {
+    text-decoration-color: rgba(255,255,255,0.12);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .footer-meta a.footer-credit:hover {
+    color: var(--text-body);
+    text-decoration-color: var(--accent);
+  }
+}
+.footer-meta-sep { margin: 0 0.5em; opacity: 0.35; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="nav-wrap">
+  <nav class="nav-pill" id="navPill" aria-label="Primary">
+    <a href="/" class="nav-logo">KnitWise</a>
+    <a href="/app" class="nav-cta">Try it <span>&rarr;</span></a>
+  </nav>
+</div>
+
+<main id="main">
+  <article class="wk-page">
+    <p class="wk-hero-label wk-hero-in">research</p>
+    <h1 class="wk-title wk-hero-in">Why KnitWise?</h1>
+    <p class="wk-lead wk-hero-in">
+      Knitting asks your hands and your attention to work at the same time. Patterns are written in dense shorthand and read in order—while the work itself is rhythmic and easy to interrupt. This page summarizes research on that gap and how KnitWise is designed to help.
+    </p>
+
+    <section class="wk-block" aria-labelledby="h-core">
+      <h2 id="h-core">The core challenge</h2>
+      <p>
+        The difficulty is partly a <strong>split-attention</strong> problem: fine motor work runs alongside tracking where you are in a pattern, counting, and planning the next move. That combination of execution and cognitive tracking is demanding.
+      </p>
+      <p>
+        Many people also expect knitting to be harder than it is at first—the motions can feel awkward until they become familiar. Abbreviations exist to keep instructions short (for example, repeating “knit one, purl one” across a row in compact form), but they only feel obvious after you have learned the notation.
+      </p>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <section class="wk-block" aria-labelledby="h-spikes">
+      <h2 id="h-spikes">Where difficulty often spikes</h2>
+      <p>These are common themes in how people describe learning and project work—not a checklist everyone hits in the same order:</p>
+      <ul>
+        <li><strong>Tension.</strong> Keeping stitches even takes practice; early on it often needs deliberate attention.</li>
+        <li><strong>Knitting in the round.</strong> Managing needles and stitch flow together can add coordination load for beginners.</li>
+        <li><strong>Shaping and short rows.</strong> Heel turns and similar steps are frequently described as easy to get wrong and redo.</li>
+        <li><strong>Project scope.</strong> Large or intricate patterns assume control and stamina that builds over time.</li>
+      </ul>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <section class="wk-block" aria-labelledby="h-barriers">
+      <h2 id="h-barriers">Barriers: process and patterns</h2>
+      <p>
+        Research with disabled knitters (ACM CHI 2021) describes barriers in two broad categories that also resonate more widely: <strong>process barriers</strong> (physical execution—needles, tension, stitch changes, dropped stitches) and <strong>pattern accessibility barriers</strong> (reading notation, charts, and abbreviations).
+      </p>
+      <p>
+        A related friction point is <strong>re-entry</strong>: after a break, finding your place can mean counting, reading the fabric, and matching it to a partially marked pattern. That cost helps explain why projects stall.
+      </p>
+      <p>
+        <strong>Mistake recovery</strong> is emotionally costly too: undoing stitch-by-stitch or ripping back is slow, and in complex fabric the correction work can feel as heavy as the original knitting.
+      </p>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <section class="wk-block" aria-labelledby="h-language">
+      <h2 id="h-language">Language: shorthand, variation, and charts</h2>
+      <p>
+        Patterns use a specialized register. Abbreviations keep rows readable once you know them, but <strong>there is no single universal standard</strong>—designers may define their own tables or variants, so knitters often learn a baseline and then re-learn local definitions.
+      </p>
+      <p>
+        Instructions can also be <strong>ambiguous</strong> when shorthand omits detail (for example, what “slip” should specify about direction and yarn position). Charts add a parallel visual language (grids, symbols, direction of reading) that is learned separately from written rows.
+      </p>
+      <p>
+        Informal community terms (for example FO/UFO, frogging, tinking, stash, KAL) form another layer on top of pattern abbreviations—useful in communities, but another vocabulary to pick up.
+      </p>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <section class="wk-block" aria-labelledby="h-retention">
+      <h2 id="h-retention">Retention: skill, working memory, and projects</h2>
+      <p>
+        <strong>Motor patterns</strong> for basic stitches can become automatic with repetition. <strong>During a session</strong>, the fragile part is often working memory: row count, repeats, stitch type, and position in a complex round all compete for attention—similar to losing count mid-sequence and not trusting where you resumed.
+      </p>
+      <p>
+        Knitters use external aids (counters, markers, chart holders, notes) because the pattern asks for more simultaneous tracking than working memory comfortably holds.
+      </p>
+      <p>
+        <strong>Across sessions</strong>, projects stretch over days or weeks; losing track between sittings is a recurring frustration. That is the retention problem KnitWise is most directly aimed at alongside in-session clarity.
+      </p>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <section class="wk-block" aria-labelledby="h-tensions">
+      <h2 id="h-tensions">Design tensions (summary)</h2>
+      <div class="tensions-wrap">
+        <table class="tensions-table" role="table">
+          <thead>
+            <tr>
+              <th scope="col">Area</th>
+              <th scope="col">Core tension</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Difficulty</th>
+              <td>Physical execution and cognitive tracking compete at the same time.</td>
+            </tr>
+            <tr>
+              <th scope="row">Barriers</th>
+              <td>Re-entry and error recovery are especially high-friction moments.</td>
+            </tr>
+            <tr>
+              <th scope="row">Language</th>
+              <td>Abbreviations are useful but not standardized; slang and charts add parallel systems.</td>
+            </tr>
+            <tr>
+              <th scope="row">Retention</th>
+              <td>Motor skill can become automatic; position in the pattern during and between sessions is easier to lose.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="section-divider" aria-hidden="true"></div>
+
+    <section class="wk-block" aria-labelledby="h-help">
+      <h2 id="h-help">How KnitWise helps</h2>
+      <p>
+        KnitWise does not replace practice or teaching. It is a <strong>pattern companion</strong> shaped around the tensions above:
+      </p>
+      <div class="how-grid">
+        <div class="how-card">
+          <h3>One step at a time</h3>
+          <p>Instructions are broken into ordered steps so you are not scanning a full pattern row to find what comes next—reducing the load of parsing dense text while you knit.</p>
+        </div>
+        <div class="how-card">
+          <h3>Context for jargon</h3>
+          <p>A built-in glossary ties terms used in your steps to plain-language explanations so you spend less time on external lookups mid-row.</p>
+        </div>
+        <div class="how-card">
+          <h3>Progress and notes stay local</h3>
+          <p>Your place and row notes are stored on your device (web or app), supporting re-entry after a break without relying on paper markup alone.</p>
+        </div>
+        <div class="how-card">
+          <h3>Size and format inputs</h3>
+          <p>Upload a PDF or image, or paste text—so the starting point matches how you actually received the pattern.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wk-block" aria-labelledby="h-refs">
+      <h2 id="h-refs">References</h2>
+      <ol class="ref-list">
+        <li>
+          Gotfrid, T., Mack, K., Lum, K. J., Yang, E., Hodgins, J. K., Hudson, S. E., &amp; Mankoff, J. (2021). <em>Stitching Together the Experiences of Disabled Knitters.</em> In <em>Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems</em> (CHI ’21). ACM.
+          <a href="https://doi.org/10.1145/3411764.3445438" rel="noopener noreferrer" target="_blank">https://doi.org/10.1145/3411764.3445438</a>
+        </li>
+      </ol>
+      <p style="margin-top:20px;font-size:14px;color:var(--text-muted);">
+        Other statements on this page summarize common themes in knitting education and craft practice; they are not individual study results unless cited above.
+      </p>
+    </section>
+  </article>
+
+  <section class="final-cta" aria-labelledby="h-cta">
+    <h2 id="h-cta">Try the companion</h2>
+    <a href="/app" class="btn-primary">Open KnitWise <span class="arrow">&rarr;</span></a>
+  </section>
+</main>
+
+<footer class="footer-zone">
+  <p class="footer-tagline"><a href="/">Back to home</a></p>
+  <div class="footer-watermark" aria-hidden="true">KnitWise</div>
+  <p class="footer-beta"><span class="footer-beta-pill">Beta — open to feedback</span></p>
+  <p class="footer-meta">
+    <span>knitwise.xyz</span>
+    <span class="footer-meta-sep" aria-hidden="true">·</span>
+    <a href="https://rohandharane.com" class="footer-credit" rel="noopener noreferrer" target="_blank">rohandharane.com</a>
+  </p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  var nav = document.getElementById('navPill');
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('scrolled', window.scrollY > 24);
+  }, { passive: true });
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  gsap.defaults({ ease: 'power3.out', force3D: true });
+
+  var tl = gsap.timeline();
+  tl.fromTo('.nav-wrap', { opacity: 0 }, { opacity: 1, duration: 0.45 }, 0);
+  tl.fromTo('.wk-hero-in', { opacity: 0, y: 10 }, {
+    opacity: 1,
+    y: 0,
+    duration: 0.5,
+    stagger: 0.08
+  }, 0.06);
+
+  gsap.utils.toArray('.wk-block').forEach(function (block) {
+    gsap.fromTo(block, { opacity: 0, y: 14 }, {
+      opacity: 1,
+      y: 0,
+      duration: 0.52,
+      scrollTrigger: { trigger: block, start: 'top 88%', once: true }
+    });
+  });
+
+  gsap.utils.toArray('.section-divider').forEach(function (el) {
+    gsap.fromTo(el, { scaleY: 0, opacity: 0 }, {
+      scaleY: 1,
+      opacity: 1,
+      duration: 0.5,
+      scrollTrigger: { trigger: el, start: 'top 92%', once: true }
+    });
+  });
+
+  ScrollTrigger.batch('.how-card', {
+    start: 'top 90%',
+    once: true,
+    onEnter: function (batch) {
+      gsap.fromTo(batch, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.42, stagger: 0.06 });
+    }
+  });
+
+  gsap.fromTo('.tensions-wrap', { opacity: 0, y: 14 }, {
+    opacity: 1,
+    y: 0,
+    duration: 0.5,
+    scrollTrigger: { trigger: '.tensions-wrap', start: 'top 88%', once: true }
+  });
+
+  var ft = gsap.timeline({
+    scrollTrigger: { trigger: '.footer-zone', start: 'top 88%', once: true }
+  });
+  ft.fromTo('.footer-tagline', { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0);
+  ft.fromTo('.footer-watermark', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.65 }, 0.04);
+  ft.fromTo('.footer-beta', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4 }, 0.1);
+  ft.fromTo('.footer-meta', { opacity: 0 }, { opacity: 1, duration: 0.32 }, 0.16);
+
+  gsap.fromTo('.final-cta h2, .final-cta .btn-primary', { opacity: 0, y: 10 }, {
+    opacity: 1,
+    y: 0,
+    duration: 0.45,
+    stagger: 0.08,
+    scrollTrigger: { trigger: '.final-cta', start: 'top 86%', once: true }
+  });
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
