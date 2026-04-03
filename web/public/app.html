@@ -1268,9 +1268,9 @@ button {
     <div class="drop-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     </div>
-    <div class="drop-text">Drop a PDF or an image here</div>
-    <div class="drop-hint">or tap to browse</div>
-    <input type="file" class="file-input" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif">
+    <div class="drop-text">PDF, image, or plain text (.txt)</div>
+    <div class="drop-hint">Word (.docx) is not supported — paste text or export PDF</div>
+    <input type="file" class="file-input" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.txt,text/plain">
   </div>
   <div class="or-divider">or</div>
   <button class="paste-toggle" id="paste-toggle">Paste pattern text</button>
@@ -1387,9 +1387,17 @@ button {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
+<script type="module">
+import * as PatternParse from '/lib/pattern-parse.mjs';
+window.__PatternParse = PatternParse;
+</script>
+<script defer>
 (function() {
   'use strict';
+
+  function getPatternParse() {
+    return window.__PatternParse || null;
+  }
 
   let patternData = null;
   let chosenSizeKey = null;
@@ -1408,6 +1416,86 @@ button {
   const PDF_SCALE = 1.5;
   const PDF_QUALITY = 0.78;
   const LIB_KEY = 'knitwise:library';
+
+  function snippetForUser(s, maxLen) {
+    if (!s) return '';
+    var t = String(s).replace(/\s+/g, ' ').replace(/[<>]/g, '').trim();
+    if (t.length > maxLen) return t.slice(0, maxLen) + '\u2026';
+    return t;
+  }
+
+  async function parseApiError(resp) {
+    const status = resp.status;
+    let body = '';
+    try {
+      body = await resp.text();
+    } catch (_) {}
+    let detail = '';
+    try {
+      const j = JSON.parse(body);
+      if (j.type === 'error' && j.error) {
+        const er = j.error;
+        detail = (typeof er === 'string' ? er : (er.message || er.type || '')) || '';
+      } else {
+        detail =
+          (j.error && typeof j.error === 'object' && (j.error.message || j.error.type)) ||
+          (typeof j.error === 'string' ? j.error : '') ||
+          j.message ||
+          '';
+      }
+      if (typeof detail === 'object') detail = JSON.stringify(detail);
+    } catch (_) {
+      detail = body ? body.slice(0, 400) : '';
+    }
+    const detailLower = (detail + ' ' + body).toLowerCase();
+    console.error('[KnitWise API]', status, detail || body);
+    if (status === 429) {
+      return 'Too many requests today. Please try again tomorrow.';
+    }
+    if (status === 413) {
+      return 'Request too large. Paste part of the pattern or use a smaller PDF.';
+    }
+    if (status === 502 || status === 504) {
+      return 'The pattern service timed out or was unavailable. Try pasting text only, a smaller file, or try again in a moment.';
+    }
+    if (status === 503 || status === 529) {
+      var s529 = snippetForUser(detail || body, 180);
+      return (
+        'The pattern service is busy or temporarily unavailable.' +
+        (s529 ? ' (' + s529 + ')' : '') +
+        ' Try again in a minute or paste plain text.'
+      );
+    }
+    if (status === 400) {
+      var s400 = snippetForUser(detail, 200);
+      return (
+        'Invalid request to the parser.' +
+        (s400 ? ' ' + s400 : ' Try pasting plain text or a different file.')
+      );
+    }
+    if (status === 401) {
+      return 'Parser authentication failed. Check server configuration (API key on Vercel).';
+    }
+    if (status === 500) {
+      if (
+        /api key|not configured|invalid.*key|authentication|unauthorized|credential|anthropic/i.test(
+          detailLower
+        )
+      ) {
+        return 'Server is not configured for pattern parsing. Add a valid ANTHROPIC_API_KEY in Vercel project settings (Environment Variables), redeploy, and try again.';
+      }
+      var s500 = snippetForUser(detail || body, 220);
+      if (s500) {
+        return 'Server error: ' + s500 + ' If this persists, try pasting plain text only or contact support.';
+      }
+      return 'Server error while parsing. Please try again.';
+    }
+    var sOther = snippetForUser(detail || body, 200);
+    return (
+      'Could not reach the pattern parser (HTTP ' + status + ').' +
+      (sOther ? ' ' + sOther : ' Try again or paste text.')
+    );
+  }
 
   if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -1583,6 +1671,7 @@ INSTRUCTION RULES:
 - Capitalize the first word of every instruction.
 - NEVER include HTML tags, angle brackets (< >), quotation marks around terms, or link-like artifacts (e.g. knit">pick up is WRONG — write "knit, pick up").
 - NEVER produce fragments like word">word or word'>word in instructions — these are formatting errors.
+- NEVER use markdown bold (**term**) or HTML in instructions — plain sentences only.
 - NEVER leave abbreviations unexpanded — always write the full word (k -> knit, p -> purl, yo -> yarn over, k2tog -> knit 2 together, ssk -> slip slip knit, CO -> cast on, BO -> bind off).
 - NEVER pass through raw pattern notation — translate everything into plain English.
 - NEVER start an instruction with a conjunction (And, But, Or).
@@ -1741,9 +1830,25 @@ EXAMPLE — Output steps (abbreviated):
   });
 
   async function handleFile(file) {
-    if (file.size > MAX_FILE_SIZE) { showError('File too large. Try under 30 MB.'); return; }
+    if (file.size > MAX_FILE_SIZE) { showError('File too large. Max 30 MB.'); return; }
+    if (!file.size) { showError('File is empty. Choose another file or paste text.'); return; }
+
+    var nameLower = (file.name || '').toLowerCase();
+    if (nameLower.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      showError('Word (.docx) is not supported. Paste the pattern text here, or export a PDF and upload that.');
+      return;
+    }
 
     try {
+      if (nameLower.endsWith('.txt') || file.type === 'text/plain') {
+        var txt = await file.text();
+        if (!txt.trim()) {
+          showError('Text file is empty.');
+          return;
+        }
+        processPattern({ type: 'text', content: txt });
+        return;
+      }
       if (file.name.toLowerCase().endsWith('.pdf')) {
         var ab = await file.arrayBuffer();
         var b64raw = btoa(new Uint8Array(ab).reduce(function(s, b) { return s + String.fromCharCode(b); }, ''));
@@ -1780,13 +1885,18 @@ EXAMPLE — Output steps (abbreviated):
 
   // ─── API ───
   async function processPattern(input) {
+    if (!getPatternParse()) {
+      showError('Pattern tools failed to load. Refresh the page and try again.');
+      return;
+    }
     showScreen('processing');
     $('processing-label').textContent = 'Reading your pattern';
     $('processing-label').setAttribute('data-text', 'Reading your pattern');
 
     let userContent = [];
     if (input.type === 'text') {
-      userContent.push({ type: 'text', text: 'Parse this knitting pattern:\n\n' + input.content });
+      var normalizedText = getPatternParse().normalizeInputForParsing(input.content);
+      userContent.push({ type: 'text', text: 'Parse this knitting pattern:\n\n' + normalizedText });
     } else if (input.type === 'pdf') {
       userContent.push({ type: 'document', source: { type: 'base64', media_type: input.mediaType, data: input.data } });
       userContent.push({ type: 'text', text: 'Parse this knitting pattern.' });
@@ -1802,44 +1912,74 @@ EXAMPLE — Output steps (abbreviated):
 
     try {
       startProcessingExperience();
-      const resp = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 20000,
-          stream: true,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: userContent }]
-        })
-      });
 
-      if (!resp.ok) throw new Error('API error ' + resp.status);
+      // ── Main parse call with timeout + abort ──
+      var parseAc = new AbortController();
+      var parseTimeout = setTimeout(function() { parseAc.abort(); }, 270000); // 4.5 min
+      var resp;
+      try {
+        resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: parseAc.signal,
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 20000,
+            stream: true,
+            system: SYSTEM_PROMPT,
+            messages: [{ role: 'user', content: userContent }]
+          })
+        });
+      } catch (fetchErr) {
+        clearTimeout(parseTimeout);
+        if (fetchErr.name === 'AbortError') throw new Error('Pattern parsing timed out. Try pasting a smaller section of the pattern or plain text.');
+        throw fetchErr;
+      }
+      clearTimeout(parseTimeout);
 
-      // Stream the response for faster perceived performance
+      if (!resp.ok) throw new Error(await parseApiError(resp));
+      var rateLeft = resp.headers.get('X-RateLimit-Remaining');
+      if (rateLeft !== null && rateLeft !== '') {
+        console.info('[KnitWise API] requests remaining today (this server):', rateLeft);
+      }
+
+      // ── Stream the response with per-chunk stall detection ──
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
       let buffer = '';
+      const STALL_MS = 120000; // 2 min without data = stall
       const processSseLine = (line) => {
         if (!line.startsWith('data: ')) return;
         const chunk = line.slice(6);
         if (chunk === '[DONE]') return;
         try {
           const evt = JSON.parse(chunk);
-          if (evt.type === 'content_block_delta' && evt.delta?.text) {
-            fullText += evt.delta.text;
+          if (evt.type === 'content_block_delta' && evt.delta) {
+            var d = evt.delta;
+            if (d.text) fullText += d.text;
           }
         } catch {}
       };
 
       while (true) {
-        const { done, value } = await reader.read();
-        buffer += decoder.decode(value, { stream: true });
+        var readResult = await Promise.race([
+          reader.read(),
+          new Promise(function(_, reject) {
+            setTimeout(function() { reject(new Error('__stall__')); }, STALL_MS);
+          })
+        ]).catch(function(e) {
+          if (e.message === '__stall__') {
+            reader.cancel();
+            throw new Error('Pattern parsing stalled — the AI service stopped responding. Try again or paste a smaller section.');
+          }
+          throw e;
+        });
+        buffer += decoder.decode(readResult.value, { stream: true });
         const lines = buffer.split('\n');
         buffer = lines.pop();
         for (const line of lines) processSseLine(line);
-        if (done) break;
+        if (readResult.done) break;
       }
       // Flush any trailing decoder/buffer content that may not end with newline.
       buffer += decoder.decode();
@@ -1852,7 +1992,23 @@ EXAMPLE — Output steps (abbreviated):
       normalizeGlossary();
       if (!patternData.steps?.length) throw new Error('No steps found');
 
-      await polishInstructions(patternData.steps);
+      // ── Polish + Repair in parallel ──
+      var [polishLog, repairLog] = await Promise.all([
+        polishInstructions(patternData.steps),
+        repairInstructionArtifacts(patternData.steps)
+      ]);
+
+      var quality = getPatternParse().filterAndValidateSteps(patternData.steps, {
+        polishLog: polishLog,
+        repairLog: repairLog
+      });
+      patternData.steps = quality.steps;
+      if (!patternData.steps.length) {
+        var rej = quality.log.rejected && quality.log.rejected.length
+          ? ' Validation rejected every step (see browser console for [KnitWise parse]). Try pasting plain text without web formatting.'
+          : '';
+        throw new Error('No usable steps after validation.' + rej);
+      }
 
       // Build section color map
       sectionColorMap = {};
@@ -1994,29 +2150,16 @@ EXAMPLE — Output steps (abbreviated):
     $('section-label').textContent = step.section;
 
     // Build instruction with size resolution and glossary terms
-    let instruction = sanitizeInstructionText(step.instruction || '');
+    var pk = getPatternParse();
+    let instruction = pk
+      ? pk.sanitizeInstructionText(step.instruction || '')
+      : String(step.instruction || '');
     if (step.sizeValues && chosenSizeKey && step.sizeValues[chosenSizeKey]) {
       const val = step.sizeValues[chosenSizeKey];
       if (!instruction.includes(val)) instruction += ' (' + val + ')';
     }
 
-    let instrHtml = esc(instruction);
-    const matches = findGlossaryMatches(instruction, step);
-    matches.forEach(match => {
-      const escapedPhrase = esc(match.phrase);
-      const re = new RegExp('(?<![\\w-])' + escRe(escapedPhrase) + '(?![\\w-])', 'gi');
-      instrHtml = instrHtml.replace(re, m =>
-        '<span class="term" data-term="' + esc(match.key) + '">' + m + '</span>'
-      );
-    });
-    // Make URLs clickable (supports https:// and www.)
-    instrHtml = instrHtml.replace(
-      /(?<![="'>])((?:https?:\/\/|www\.)[^\s<)]+)/gi,
-      (m) => {
-        const href = /^https?:\/\//i.test(m) ? m : ('https://' + m);
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="step-link">${m}</a>`;
-      }
-    );
+    let instrHtml = buildInstructionHtmlWithGlossary(instruction, step);
     $('step-instruction').innerHTML = instrHtml;
 
     // Attach glossary listeners
@@ -2409,32 +2552,11 @@ EXAMPLE — Output steps (abbreviated):
     return (s || '').trim().toLowerCase();
   }
 
-  function sanitizeInstructionText(text) {
-    if (!text) return '';
-    return String(text)
-      // Model artifact: word">word or word">word (glossary link leakage)
-      .replace(/[""''\u201C\u201D\u2018\u2019]?\s*>\s*(?=[a-zA-Z])/g, ' ')
-      // Strip full HTML-like tags
-      .replace(/<[^>]*>/g, ' ')
-      // Any remaining lone angle brackets
-      .replace(/[<>]/g, ' ')
-      // Normalize smart quotes to ASCII
-      .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'")
-      // Repeated punctuation
-      .replace(/([.,;:!?])\1+/g, '$1')
-      // Leading conjunctions
-      .replace(/^\s*(And|But|Or)\s+/i, '')
-      // Collapse whitespace
-      .replace(/\s+/g, ' ')
-      .trim()
-      // Capitalize first letter
-      .replace(/^([a-z])/, function(m) { return m.toUpperCase(); })
-      // Ensure terminal punctuation
-      .replace(/([^.!?])\s*$/, '$1.');
-  }
-
   function splitDenseInstruction(instruction) {
-    const cleaned = sanitizeInstructionText(instruction);
+    var pkSplit = getPatternParse();
+    const cleaned = pkSplit
+      ? pkSplit.sanitizeInstructionText(instruction)
+      : String(instruction || '');
     if (!cleaned) return [];
     if (cleaned.length < 250) return [cleaned];
 
@@ -2460,7 +2582,10 @@ EXAMPLE — Output steps (abbreviated):
     const expanded = [];
     let nextId = 1;
     inputSteps.forEach(step => {
-      const baseInstruction = sanitizeInstructionText(step.instruction || '');
+      var pkExp = getPatternParse();
+      const baseInstruction = pkExp
+        ? pkExp.sanitizeInstructionText(step.instruction || '')
+        : String(step.instruction || '');
       if (step.type && step.type !== 'normal') {
         expanded.push({ ...step, id: nextId++, instruction: baseInstruction });
         return;
@@ -2534,6 +2659,69 @@ EXAMPLE — Output steps (abbreviated):
     });
 
     return [...candidates.values()].sort((a, b) => b.phrase.length - a.phrase.length);
+  }
+
+  /**
+   * Non-overlapping glossary hit intervals on plain instruction text (longest phrases win).
+   * Only terms with a real glossary entry get a span.
+   */
+  function findGlossaryMatchIntervals(instruction, step) {
+    if (!patternData?.glossary || !instruction) return [];
+    const gl = patternData.glossary;
+    const matches = findGlossaryMatches(instruction, step);
+    const valid = matches.filter(function(m) {
+      return gl[normalizeTermKey(m.key)];
+    });
+    valid.sort(function(a, b) {
+      return b.phrase.length - a.phrase.length;
+    });
+    const placed = [];
+    for (let mi = 0; mi < valid.length; mi++) {
+      const m = valid[mi];
+      const re = new RegExp('(?<![\\w-])' + escRe(m.phrase) + '(?![\\w-])', 'gi');
+      let match;
+      while ((match = re.exec(instruction)) !== null) {
+        const start = match.index;
+        const end = start + match[0].length;
+        const overlaps = placed.some(function(p) {
+          return Math.max(p.start, start) < Math.min(p.end, end);
+        });
+        if (overlaps) continue;
+        placed.push({ start: start, end: end, key: normalizeTermKey(m.key) });
+      }
+    }
+    placed.sort(function(a, b) {
+      return a.start - b.start;
+    });
+    return placed;
+  }
+
+  function buildInstructionHtmlWithGlossary(instruction, step) {
+    const intervals = findGlossaryMatchIntervals(instruction, step);
+    let pos = 0;
+    let out = '';
+    const gl = patternData?.glossary;
+    for (let ii = 0; ii < intervals.length; ii++) {
+      const iv = intervals[ii];
+      if (iv.start > pos) out += esc(instruction.slice(pos, iv.start));
+      const slice = instruction.slice(iv.start, iv.end);
+      const gKey = normalizeTermKey(iv.key);
+      if (gl && gl[gKey]) {
+        out += '<span class="term" data-term="' + esc(gKey) + '">' + esc(slice) + '</span>';
+      } else {
+        out += esc(slice);
+      }
+      pos = iv.end;
+    }
+    if (pos < instruction.length) out += esc(instruction.slice(pos));
+    out = out.replace(
+      /(?<![="'>])((?:https?:\/\/|www\.)[^\s<)]+)/gi,
+      function(m) {
+        const href = /^https?:\/\//i.test(m) ? m : ('https://' + m);
+        return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="step-link">' + m + '</a>';
+      }
+    );
+    return out;
   }
 
   let processingProgressTimer = null;
@@ -2623,48 +2811,148 @@ EXAMPLE — Output steps (abbreviated):
     $('processing-label').style.opacity = '1';
   }
 
-  // Upgrade parser result via fallback repair call when needed.
+  async function repairInstructionArtifacts(steps) {
+    var log = { ran: false, count: 0, ok: false, error: null };
+    var pk = getPatternParse();
+    if (!pk || !steps || !steps.length || typeof pk.rawInstructionNeedsRepair !== 'function') return log;
+    var indices = [];
+    var batch = [];
+    for (var i = 0; i < steps.length; i++) {
+      var raw = steps[i].instruction || '';
+      if (pk.rawInstructionNeedsRepair(raw)) {
+        indices.push(i);
+        batch.push(raw);
+      }
+    }
+    if (!batch.length) return log;
+    log.ran = true;
+    log.count = batch.length;
+    var repairPrompt = 'You fix knitting instruction strings that may contain HTML fragments, markdown **, or copy-paste junk.\n' +
+      'Rewrite each string as plain English knitting directions. No HTML tags, no **, no angle-quote junk like \">. Keep the same meaning.\n' +
+      'Return ONLY a JSON array of strings in the same order as input. No preamble.';
+    try {
+      var attempts = 0;
+      var resp = null;
+      while (attempts < 2) {
+        attempts++;
+        var repairAc = new AbortController();
+        var repairTimer = setTimeout(function() { repairAc.abort(); }, 90000);
+        resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: repairAc.signal,
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: Math.min(16000, 400 * batch.length + 2000),
+            stream: false,
+            messages: [{ role: 'user', content: [{ type: 'text', text: repairPrompt + '\n\n' + JSON.stringify(batch) }] }]
+          })
+        });
+        clearTimeout(repairTimer);
+        if (resp.ok) break;
+        if (attempts < 2) await new Promise(function(r) { setTimeout(r, 900); });
+      }
+      if (!resp || !resp.ok) {
+        log.error = resp ? await parseApiError(resp) : 'no response';
+        console.warn('[KnitWise parse] repair HTTP failed:', log.error);
+        return log;
+      }
+      var data = await resp.json();
+      var txt = (data && data.content && data.content.map(function(c) { return c.text || ''; }).join('') || '').trim();
+      if (!txt) {
+        log.error = 'empty repair response';
+        return log;
+      }
+      txt = txt.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      var fixed = JSON.parse(txt);
+      if (!Array.isArray(fixed) || fixed.length !== batch.length) {
+        log.error = 'repair array length mismatch';
+        return log;
+      }
+      for (var j = 0; j < indices.length; j++) {
+        if (typeof fixed[j] === 'string' && fixed[j].trim()) {
+          steps[indices[j]].instruction = fixed[j].trim();
+        }
+      }
+      log.ok = true;
+    } catch (e) {
+      log.error = e.message;
+      console.warn('[KnitWise parse] repair failed:', e.message);
+    }
+    return log;
+  }
+
   async function polishInstructions(steps) {
-    if (!steps || !steps.length) return;
+    var log = { ok: false, attempts: 0, skipped: null, error: null };
+    if (!steps || !steps.length) {
+      log.skipped = 'no_steps';
+      return log;
+    }
     try {
       var instructions = steps.map(function(s) { return s.instruction || ''; });
       var polishPrompt = 'You are a knitting instruction editor. Your tone is clear, calm, and encouraging.\n' +
         'Clean up these instructions:\n' +
         '- Fix punctuation, capitalization, and grammar.\n' +
-        '- Remove stray characters (>, <, angle brackets, quotation artifacts).\n' +
+        '- Remove stray characters (>, <, angle brackets, quotation artifacts, markdown **).\n' +
         '- Expand any remaining abbreviations into full words.\n' +
         '- Keep meaning identical — do not add or remove information.\n' +
         '- Use second-person imperative voice ("Knit 10 stitches." not "You should knit 10.").\n' +
         '- Each instruction should read like one step in a guided knitting tutorial.\n' +
         '- Do not invent new information. Only polish what is there.\n' +
         'Return ONLY a JSON array of the cleaned strings in the same order. No preamble.';
-
-      var resp = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 16000,
-          stream: false,
-          messages: [{ role: 'user', content: [{ type: 'text', text: polishPrompt + '\n\n' + JSON.stringify(instructions) }] }]
-        })
-      });
-
-      if (!resp.ok) return;
+      var resp = null;
+      var attempt = 0;
+      while (attempt < 2) {
+        attempt++;
+        log.attempts = attempt;
+        var polishAc = new AbortController();
+        var polishTimer = setTimeout(function() { polishAc.abort(); }, 90000);
+        resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: polishAc.signal,
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 16000,
+            stream: false,
+            messages: [{ role: 'user', content: [{ type: 'text', text: polishPrompt + '\n\n' + JSON.stringify(instructions) }] }]
+          })
+        });
+        clearTimeout(polishTimer);
+        if (resp.ok) break;
+        if (attempt < 2) await new Promise(function(r) { setTimeout(r, 900); });
+      }
+      if (!resp.ok) {
+        log.error = await parseApiError(resp);
+        console.warn('[KnitWise parse] polish failed after retries:', log.error);
+        return log;
+      }
       var data = await resp.json();
-      var txt = (data?.content?.map(function(c) { return c?.text || ''; }).join('') || '').trim();
-      if (!txt) return;
+      var txt = (data && data.content && data.content.map(function(c) { return c.text || ''; }).join('') || '').trim();
+      if (!txt) {
+        log.skipped = 'empty_body';
+        console.warn('[KnitWise parse] polish empty response body');
+        return log;
+      }
       txt = txt.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
       var polished = JSON.parse(txt);
-      if (!Array.isArray(polished) || polished.length !== steps.length) return;
+      if (!Array.isArray(polished) || polished.length !== steps.length) {
+        log.skipped = 'json_shape';
+        log.error = 'polish array length mismatch';
+        console.warn('[KnitWise parse] polish bad JSON shape');
+        return log;
+      }
       for (var i = 0; i < steps.length; i++) {
         if (typeof polished[i] === 'string' && polished[i].trim()) {
           steps[i].instruction = polished[i].trim();
         }
       }
+      log.ok = true;
     } catch (e) {
-      console.warn('Polish pass skipped:', e.message);
+      log.error = e.message;
+      console.warn('[KnitWise parse] polish exception:', e.message);
     }
+    return log;
   }
 
   async function safeParsePatternJson(raw) {
@@ -2700,9 +2988,12 @@ Keep exactly the same schema and meaning. Do not add explanations.
 Malformed JSON:
 ${badJson}`;
 
+    var jrAc = new AbortController();
+    var jrTimer = setTimeout(function() { jrAc.abort(); }, 90000);
     const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: jrAc.signal,
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 20000,
@@ -2710,8 +3001,9 @@ ${badJson}`;
         messages: [{ role: 'user', content: [{ type: 'text', text: repairPrompt }] }]
       })
     });
+    clearTimeout(jrTimer);
 
-    if (!resp.ok) throw new Error('API error ' + resp.status);
+    if (!resp.ok) throw new Error(await parseApiError(resp));
     const data = await resp.json();
     const txt = data?.content?.map(c => c?.text || '').join('').trim() || '';
     if (!txt) throw new Error('Could not repair model JSON');
