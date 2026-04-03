@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knitwise — Parse Quality Harness</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f7f7f4; --surface: #fff; --accent: #ffa81d;
+  --text: #1a1a1a; --text-2: #555; --text-3: #888;
+  --red: #d94040; --green: #2a9d2a; --yellow: #c5960c;
+  --mono: 'SF Mono', 'Fira Code', monospace;
+  --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); }
+body { display: flex; flex-direction: column; }
+
+header {
+  padding: 20px 24px 16px; border-bottom: 1px solid #ddd;
+  display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+}
+header h1 { font-size: 18px; font-weight: 600; }
+header .score { font-family: var(--mono); font-size: 14px; color: var(--text-2); margin-left: auto; }
+.score .good { color: var(--green); font-weight: 600; }
+.score .warn { color: var(--yellow); font-weight: 600; }
+.score .bad { color: var(--red); font-weight: 600; }
+
+.controls {
+  padding: 16px 24px; border-bottom: 1px solid #eee;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; flex-shrink: 0;
+}
+.controls label { font-size: 13px; color: var(--text-2); }
+.controls input[type="file"] { font-size: 13px; }
+.controls textarea {
+  flex: 1; min-width: 200px; min-height: 60px; max-height: 120px;
+  padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px;
+  font-size: 13px; font-family: var(--mono); resize: vertical;
+}
+button.run {
+  padding: 8px 20px; border: none; border-radius: 8px;
+  background: var(--accent); color: #fff; font-weight: 600;
+  font-size: 14px; cursor: pointer;
+}
+button.run:disabled { opacity: 0.5; cursor: not-allowed; }
+button.run:hover:not(:disabled) { filter: brightness(1.05); }
+.status { font-size: 13px; color: var(--text-2); }
+
+.results {
+  flex: 1; overflow-y: auto; padding: 16px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.step-row {
+  background: var(--surface); border: 1px solid #e5e5e5; border-radius: 10px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.step-row.flagged { border-color: var(--red); border-width: 2px; }
+.step-header {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-family: var(--mono); color: var(--text-3);
+}
+.step-header .step-num { font-weight: 700; color: var(--text); font-size: 14px; }
+.step-header .section-badge {
+  background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 4px;
+}
+.step-header .step-type {
+  margin-left: auto; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.step-instruction {
+  font-size: 16px; line-height: 1.5; color: var(--text);
+}
+.step-tip {
+  font-size: 13px; color: var(--text-2); font-style: italic;
+  padding-left: 12px; border-left: 2px solid #ddd;
+}
+.step-issues {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.issue-tag {
+  font-size: 11px; font-family: var(--mono); padding: 2px 8px;
+  border-radius: 4px; font-weight: 600;
+}
+.issue-tag.error { background: rgba(217,64,64,0.1); color: var(--red); }
+.issue-tag.warn { background: rgba(197,150,12,0.1); color: var(--yellow); }
+.step-raw {
+  font-size: 11px; font-family: var(--mono); color: var(--text-3);
+  background: rgba(0,0,0,0.03); padding: 8px 10px; border-radius: 6px;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 80px; overflow-y: auto;
+  display: none;
+}
+.step-row:hover .step-raw, .step-row.flagged .step-raw { display: block; }
+
+.meta-section {
+  background: var(--surface); border: 1px solid #e5e5e5; border-radius: 10px;
+  padding: 14px 16px;
+}
+.meta-section h3 { font-size: 14px; margin-bottom: 8px; color: var(--text-2); }
+.meta-section pre {
+  font-size: 11px; font-family: var(--mono); color: var(--text-3);
+  white-space: pre-wrap; max-height: 200px; overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Knitwise Parse Harness</h1>
+  <div class="score" id="score"></div>
+</header>
+
+<div class="controls">
+  <label>Upload PDF/image:</label>
+  <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp">
+  <label>or paste text:</label>
+  <textarea id="text-input" placeholder="Paste raw pattern text here..."></textarea>
+  <button class="run" id="run-btn">Parse</button>
+  <div class="status" id="status"></div>
+</div>
+
+<div class="results" id="results">
+  <div style="text-align:center;color:var(--text-3);padding:60px 0;">Upload a pattern or paste text, then click Parse.</div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var API_ORIGIN = (function() {
+    try {
+      var o = window.location && window.location.origin;
+      if (o && o !== 'null' && window.location.protocol && window.location.protocol !== 'file:') return o;
+    } catch (e) {}
+    return 'https://knitwise.xyz';
+  })();
+  const MODEL = 'claude-haiku-4-5-20251001';
+
+  const SYSTEM_PROMPT = document.currentScript ? '' : '';
+
+  function getSystemPrompt() {
+    return `Return ONLY valid JSON (no preamble, no fences). Parse the knitting pattern into:
+{"title":string,"description":string,"sizes":[{"label":string,"key":string,"details":string}],"materials":[{"label":string,"value":string}],"glossary":{"term":{"abbr":string|null,"full":string|null,"def":string,"beginner":string|null,"whenToUse":string|null,"example":string|null}},"steps":[{"id":number,"section":string,"label":string,"instruction":string,"terms":[string],"tip":string|null,"type":"normal"|"repeat"|"length","repeatTotal":number|null,"repeatLabel":string|null,"lengthTarget":string|null,"sizeValues":object|null}]}
+
+INPUT HANDLING:
+- The input may be messy, OCR-extracted, poorly formatted, with broken lines or inconsistent spacing.
+- Intelligently clean and interpret the input. NEVER output raw or messy pattern text without restructuring it.
+- DO NOT invent instructions — only interpret what is actually present in the pattern.
+- If something is ambiguous, make a reasonable assumption and note it in the step's "tip" field.
+
+TONE: Clear, calm, encouraging. Beginner-friendly but technically accurate.
+GOAL: The output should feel like a guided knitting tutorial, not a compressed pattern.
+
+INSTRUCTION RULES:
+- One action per step. If a row has multiple distinct actions, split into separate steps.
+- Keep each instruction clear and complete. Split only when it improves understanding.
+- Use second-person imperative voice: "Knit 10 stitches." not "The knitter knits 10 stitches."
+- Each instruction must be a complete, grammatically correct sentence ending with a period.
+- Capitalize the first word of every instruction.
+- NEVER include HTML tags, angle brackets (< >), or stray punctuation artifacts.
+- NEVER leave abbreviations unexpanded — always write the full word (k -> knit, p -> purl, yo -> yarn over, k2tog -> knit 2 together, ssk -> slip slip knit, CO -> cast on, BO -> bind off).
+- NEVER pass through raw pattern notation — translate everything into plain English.
+- NEVER start an instruction with a conjunction (And, But, Or).
+- Clearly explain repeats in plain language. BAD: "Row 3-10: rep" GOOD: "Repeat Rows 3 through 10 until the piece measures 15 cm."
+- Where relevant, include stitch count checkpoints in tips (e.g. "You should have 42 stitches on your needle.").
+- Add common-mistake warnings to tips where beginners often go wrong.
+
+GLOSSARY:
+- Put all knitting terms used in instructions into glossary with plain-English definitions.
+- For each glossary term include: beginner (one practical tip), whenToUse (why this matters), example (one short contextual example).
+
+SIZING:
+- Extract size-specific numbers into sizeValues; keep instruction text size-agnostic when possible.
+- If only one size exists, use key "OS".
+
+EXAMPLE — Input snippet:
+"CO 42 sts. Row 1 (RS): *K2, P2; rep from * to last 2 sts, K2. Row 2: *P2, K2; rep from * to last 2 sts, P2."
+
+EXAMPLE — Output steps (abbreviated):
+[{"id":1,"section":"Ribbing","instruction":"Cast on 42 stitches.","tip":"Use long-tail cast on for a stretchy edge.","type":"normal"},{"id":2,"section":"Ribbing","instruction":"Row 1 (right side): Knit 2, purl 2. Repeat this pattern across the row until 2 stitches remain, then knit 2.","tip":"You should have 42 stitches on your needle.","type":"normal"},{"id":3,"section":"Ribbing","instruction":"Row 2: Purl 2, knit 2. Repeat this pattern across the row until 2 stitches remain, then purl 2.","type":"normal"}]`;
+  }
+
+  const $ = id => document.getElementById(id);
+
+  function sanitizeInstructionText(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/["']\s*>\s*/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/(?<!\w)[<>](?!\w)/g, '')
+      .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'")
+      .replace(/([.,;:!?])\1+/g, '$1')
+      .replace(/^\s*(And|But|Or)\s+/i, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/^([a-z])/, function(m) { return m.toUpperCase(); })
+      .replace(/([^.!?])\s*$/, '$1.');
+  }
+
+  // Quality checks per instruction
+  function analyzeStep(step) {
+    const issues = [];
+    const instr = step.instruction || '';
+
+    if (/[<>]/.test(instr)) issues.push({ type: 'error', msg: 'Contains < or >' });
+    if (/[""]/.test(instr)) issues.push({ type: 'warn', msg: 'Smart quotes' });
+    if (/["']\s*>/.test(instr)) issues.push({ type: 'error', msg: 'Model artifact: \'>"' });
+    if (/([.,;:!?])\1{1,}/.test(instr)) issues.push({ type: 'warn', msg: 'Repeated punctuation' });
+    if (instr.length > 350) issues.push({ type: 'warn', msg: 'Very long (' + instr.length + ' chars)' });
+    if (/^\s*(and|but|or)\s/i.test(instr)) issues.push({ type: 'warn', msg: 'Starts with conjunction' });
+    if (instr && /^[a-z]/.test(instr)) issues.push({ type: 'warn', msg: 'Lowercase start' });
+    if (instr && !/[.!?]$/.test(instr.trim())) issues.push({ type: 'warn', msg: 'No terminal punctuation' });
+
+    const abbrPattern = /\b(k\d|p\d|k2tog|ssk|yo|co|bo|sl|psso|kfb|pfb|m1l|m1r|pm|sm)\b/gi;
+    const abbrMatches = instr.match(abbrPattern);
+    if (abbrMatches) issues.push({ type: 'error', msg: 'Unexpanded abbr: ' + abbrMatches.join(', ') });
+
+    if (!step.section) issues.push({ type: 'warn', msg: 'Missing section' });
+    if (!step.instruction) issues.push({ type: 'error', msg: 'Empty instruction' });
+
+    return issues;
+  }
+
+  function renderResults(data) {
+    const results = $('results');
+    results.innerHTML = '';
+
+    // Meta
+    const meta = document.createElement('div');
+    meta.className = 'meta-section';
+    meta.innerHTML = '<h3>Pattern: ' + esc(data.title || 'Untitled') + '</h3>' +
+      '<pre>' + esc(JSON.stringify({ title: data.title, description: data.description, sizes: data.sizes, materials: data.materials }, null, 2)) + '</pre>';
+    results.appendChild(meta);
+
+    // Glossary
+    if (data.glossary && Object.keys(data.glossary).length) {
+      const gl = document.createElement('div');
+      gl.className = 'meta-section';
+      gl.innerHTML = '<h3>Glossary (' + Object.keys(data.glossary).length + ' terms)</h3>' +
+        '<pre>' + esc(JSON.stringify(data.glossary, null, 2)) + '</pre>';
+      results.appendChild(gl);
+    }
+
+    // Steps
+    let totalIssues = 0;
+    let stepsWithIssues = 0;
+    const steps = data.steps || [];
+
+    steps.forEach(function(step, i) {
+      const issues = analyzeStep(step);
+      if (issues.length > 0) stepsWithIssues++;
+      totalIssues += issues.length;
+
+      const row = document.createElement('div');
+      row.className = 'step-row' + (issues.some(x => x.type === 'error') ? ' flagged' : '');
+
+      let html = '<div class="step-header">' +
+        '<span class="step-num">#' + (i + 1) + '</span>' +
+        '<span class="section-badge">' + esc(step.section || '?') + '</span>' +
+        '<span class="step-type">' + esc(step.type || 'normal') + '</span>' +
+        '</div>';
+
+      html += '<div class="step-instruction">' + esc(sanitizeInstructionText(step.instruction || '')) + '</div>';
+
+      if (step.tip) {
+        html += '<div class="step-tip">' + esc(step.tip) + '</div>';
+      }
+
+      if (issues.length) {
+        html += '<div class="step-issues">' +
+          issues.map(function(iss) { return '<span class="issue-tag ' + iss.type + '">' + esc(iss.msg) + '</span>'; }).join('') +
+          '</div>';
+      }
+
+      html += '<div class="step-raw">' + esc(JSON.stringify(step, null, 2)) + '</div>';
+
+      row.innerHTML = html;
+      results.appendChild(row);
+    });
+
+    // Score
+    const cleanPct = steps.length ? Math.round(((steps.length - stepsWithIssues) / steps.length) * 100) : 0;
+    const scoreClass = cleanPct >= 90 ? 'good' : (cleanPct >= 70 ? 'warn' : 'bad');
+    $('score').innerHTML = steps.length + ' steps | ' +
+      '<span class="' + scoreClass + '">' + cleanPct + '% clean</span> | ' +
+      totalIssues + ' issues';
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  async function streamParse(userContent, systemPrompt) {
+    const resp = await fetch(API_ORIGIN + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 20000,
+        stream: true,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userContent }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+    function processSseLine(line) {
+      if (!line.startsWith('data: ')) return;
+      var chunk = line.slice(6);
+      if (chunk === '[DONE]') return;
+      try {
+        var evt = JSON.parse(chunk);
+        if (evt.type === 'content_block_delta' && evt.delta && evt.delta.text) {
+          fullText += evt.delta.text;
+        }
+      } catch (e) {}
+    }
+
+    while (true) {
+      var result = await reader.read();
+      buffer += decoder.decode(result.value, { stream: true });
+      var lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (var j = 0; j < lines.length; j++) processSseLine(lines[j]);
+      if (result.done) break;
+    }
+    buffer += decoder.decode();
+    buffer.split('\n').forEach(processSseLine);
+
+    return fullText;
+  }
+
+  async function polishInstructions(steps) {
+    if (!steps || !steps.length) return;
+    try {
+      var instructions = steps.map(function(s) { return s.instruction || ''; });
+      var polishPrompt = 'You are a knitting instruction editor. Your tone is clear, calm, and encouraging.\n' +
+        'Clean up these instructions:\n' +
+        '- Fix punctuation, capitalization, and grammar.\n' +
+        '- Remove stray characters (>, <, angle brackets, quotation artifacts).\n' +
+        '- Expand any remaining abbreviations into full words.\n' +
+        '- Keep meaning identical — do not add or remove information.\n' +
+        '- Use second-person imperative voice ("Knit 10 stitches." not "You should knit 10.").\n' +
+        '- Each instruction should read like one step in a guided knitting tutorial.\n' +
+        '- Do not invent new information. Only polish what is there.\n' +
+        'Return ONLY a JSON array of the cleaned strings in the same order. No preamble.';
+
+      var resp = await fetch(API_ORIGIN + '/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 16000,
+          stream: false,
+          messages: [{ role: 'user', content: [{ type: 'text', text: polishPrompt + '\n\n' + JSON.stringify(instructions) }] }]
+        })
+      });
+
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var txt = (data?.content?.map(function(c) { return c?.text || ''; }).join('') || '').trim();
+      if (!txt) return;
+      txt = txt.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      var polished = JSON.parse(txt);
+      if (!Array.isArray(polished) || polished.length !== steps.length) return;
+      for (var i = 0; i < steps.length; i++) {
+        if (typeof polished[i] === 'string' && polished[i].trim()) {
+          steps[i].instruction = polished[i].trim();
+        }
+      }
+    } catch (e) {
+      console.warn('Polish pass skipped:', e.message);
+    }
+  }
+
+  function extractLikelyJson(text) {
+    if (!text) return '';
+    var start = text.indexOf('{');
+    var end = text.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) return '';
+    return text.slice(start, end + 1).trim();
+  }
+
+  async function runParse(input) {
+    $('status').textContent = 'Sending to API...';
+    $('run-btn').disabled = true;
+    var startTime = Date.now();
+
+    try {
+      var userContent = [];
+      if (input.type === 'text') {
+        userContent.push({ type: 'text', text: 'Parse this knitting pattern:\n\n' + input.content });
+      } else if (input.type === 'pdf') {
+        userContent.push({ type: 'document', source: { type: 'base64', media_type: input.mediaType, data: input.data } });
+        userContent.push({ type: 'text', text: 'Parse this knitting pattern.' });
+      } else if (input.type === 'image') {
+        userContent.push({ type: 'image', source: { type: 'base64', media_type: input.mediaType, data: input.data } });
+        userContent.push({ type: 'text', text: 'Parse this knitting pattern.' });
+      }
+
+      $('status').textContent = 'Streaming response...';
+      var fullText = await streamParse(userContent, getSystemPrompt());
+
+      if (!fullText) throw new Error('No text in response');
+
+      var raw = fullText.trim().replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      var data;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        var candidate = extractLikelyJson(raw);
+        if (candidate) {
+          data = JSON.parse(candidate);
+        } else {
+          throw new Error('JSON parse failed: ' + e.message);
+        }
+      }
+
+      if (data.steps && data.steps.length) {
+        $('status').textContent = 'Polishing instructions...';
+        await polishInstructions(data.steps);
+      }
+
+      var elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      $('status').textContent = 'Done in ' + elapsed + 's — ' + (data.steps ? data.steps.length : 0) + ' steps';
+      renderResults(data);
+
+    } catch (err) {
+      $('status').textContent = 'Error: ' + err.message;
+      $('results').innerHTML = '<div style="color:var(--red);padding:20px;">' + esc(err.message) + '<br><br>Raw response (first 2000 chars):<br><pre style="font-size:11px;white-space:pre-wrap;">' + esc((fullText || '').slice(0, 2000)) + '</pre></div>';
+    } finally {
+      $('run-btn').disabled = false;
+    }
+  }
+
+  $('run-btn').addEventListener('click', function() {
+    var textVal = $('text-input').value.trim();
+    var fileEl = $('file-input');
+
+    if (textVal) {
+      runParse({ type: 'text', content: textVal });
+      return;
+    }
+
+    if (fileEl.files.length) {
+      var file = fileEl.files[0];
+      var reader = new FileReader();
+      reader.onload = function() {
+        var b64 = reader.result.split(',')[1];
+        if (file.name.endsWith('.pdf')) {
+          runParse({ type: 'pdf', data: b64, mediaType: 'application/pdf' });
+        } else {
+          runParse({ type: 'image', data: b64, mediaType: file.type });
+        }
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    $('status').textContent = 'No input — upload a file or paste text.';
+  });
+
+})();
+</script>
+</body>
+</html>

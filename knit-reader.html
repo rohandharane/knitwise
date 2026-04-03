@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>KnitWise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --cream:    #F4EFE5;
+  --cream-2:  #EDE6D8;
+  --cream-3:  #E3D9C8;
+  --ink:      #1A1814;
+  --ink-2:    #5C5448;
+  --ink-3:    #A09890;
+  --ink-4:    #C8BFB4;
+  --accent:   #BF5C2C;
+  --border:   rgba(26,24,20,0.10);
+  --border-2: rgba(26,24,20,0.18);
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+}
+
+html {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background: var(--cream);
+}
+
+#app {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  min-height: 100dvh;
+}
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Buttons ─── */
+button {
+  font-family: var(--font-mono);
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 100ms var(--ease-out);
+}
+button:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:active { transform: none; transition-duration: 0.01ms; }
+}
+
+/* ─── PHASE 1: UPLOAD ─── */
+#upload-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 32px;
+}
+
+.upload-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.upload-subtitle {
+  font-size: 13px;
+  color: var(--ink-3);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+.drop-zone {
+  width: 100%;
+  border: 2px dashed var(--cream-3);
+  border-radius: 16px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: border-color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.drop-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(191,92,44,0.04);
+}
+
+.drop-zone-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--cream-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drop-zone-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--ink-3);
+}
+
+.drop-zone-text {
+  font-size: 14px;
+  color: var(--ink-2);
+  text-align: center;
+}
+.drop-zone-hint {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.file-input {
+  display: none;
+}
+
+.or-divider {
+  font-size: 11px;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.paste-toggle {
+  font-size: 13px;
+  color: var(--accent);
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 160ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .drop-zone:hover {
+    border-color: var(--ink-4);
+    background: var(--cream-2);
+  }
+  .paste-toggle:hover {
+    background: rgba(191,92,44,0.06);
+  }
+}
+
+.paste-area {
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.paste-area.visible {
+  display: flex;
+}
+
+.paste-area textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 16px;
+  border: 1.5px solid var(--cream-3);
+  border-radius: 12px;
+  background: var(--cream-2);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 160ms var(--ease-out);
+}
+.paste-area textarea:focus {
+  border-color: var(--accent);
+}
+.paste-area textarea::placeholder {
+  color: var(--ink-4);
+}
+
+.paste-submit {
+  align-self: flex-end;
+  padding: 10px 24px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.api-key-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.api-key-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--cream-3);
+  border-radius: 10px;
+  background: var(--cream-2);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 160ms var(--ease-out);
+}
+.api-key-row input:focus {
+  border-color: var(--accent);
+}
+.api-key-row input::placeholder {
+  color: var(--ink-4);
+}
+.api-key-label {
+  font-size: 11px;
+  color: var(--ink-3);
+  width: 100%;
+  text-align: center;
+}
+
+/* ─── PHASE 2: PROCESSING ─── */
+#processing-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 24px;
+}
+
+.processing-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2.5px solid var(--cream-3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processing-spinner { animation-duration: 0.01ms; }
+}
+
+.processing-label {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.processing-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink);
+  text-align: center;
+}
+
+/* ─── ERROR STATE ─── */
+#error-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 20px;
+  text-align: center;
+}
+
+.error-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(191,92,44,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 22px;
+  font-family: var(--font-display);
+}
+
+.error-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink);
+}
+
+.error-message {
+  font-size: 13px;
+  color: var(--ink-2);
+  max-width: 300px;
+  line-height: 1.6;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-outline {
+  padding: 10px 20px;
+  border: 1.5px solid var(--cream-3);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+  transition: border-color 160ms var(--ease-out);
+}
+.btn-solid {
+  padding: 10px 20px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ─── PHASE 3: SIZE PICKER ─── */
+#size-screen {
+  padding: 32px 24px;
+  gap: 24px;
+}
+
+.size-header {
+  text-align: center;
+}
+.size-header h2 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+.size-header p {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.size-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.size-card {
+  width: 100%;
+  padding: 20px;
+  background: var(--cream-2);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+
+.size-card .size-label {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink);
+}
+.size-card .size-details {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .size-card:hover {
+    border-color: var(--accent);
+    background: rgba(191,92,44,0.03);
+  }
+  .btn-outline:hover {
+    border-color: var(--ink-3);
+  }
+}
+
+/* ─── PHASE 4: STEP READER ─── */
+#reader-screen {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.reader-topbar {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px 10px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.topbar-back {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.topbar-back svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-2);
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.topbar-step {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.topbar-size-chip {
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(191,92,44,0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.progress-bar {
+  height: 3px;
+  background: var(--cream-3);
+  flex-shrink: 0;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+}
+
+.reader-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px 0;
+  position: relative;
+}
+
+.step-card-wrapper {
+  width: 100%;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.section-name {
+  font-size: 11px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.step-number {
+  font-size: 10px;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.step-label {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.step-instruction {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.step-instruction .glossary-term {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Long instruction scaling */
+.step-instruction.long-text {
+  font-size: 22px;
+}
+.step-instruction.very-long-text {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* Repeat tracker */
+.repeat-tracker {
+  background: var(--cream-2);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.repeat-header {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-bottom: 12px;
+}
+
+.repeat-pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.repeat-pip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cream-3);
+  transition: background-color 160ms var(--ease-out);
+}
+.repeat-pip.done {
+  background: var(--accent);
+}
+
+.repeat-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+.repeat-btn.all-done {
+  background: var(--cream-3);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+/* Length target */
+.length-block {
+  background: var(--cream-2);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.length-icon {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: var(--ink-3);
+}
+.length-text {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.length-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink);
+  margin-top: 4px;
+}
+
+/* Tip block */
+.step-tip {
+  border-left: 3px solid var(--cream-3);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+/* Bottom nav */
+.reader-nav {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px 24px;
+  flex-shrink: 0;
+}
+
+.nav-back {
+  width: 48px;
+  height: 48px;
+  background: var(--cream-2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.nav-back svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-2);
+}
+.nav-back.hidden {
+  visibility: hidden;
+}
+
+.nav-next {
+  flex: 1;
+  height: 48px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.nav-next.locked {
+  background: var(--cream-3);
+  color: var(--ink-3);
+}
+.nav-next.locked .nav-next-text {
+  font-size: 11px;
+}
+
+/* ─── GLOSSARY SHEET ─── */
+.sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(26,24,20,0.3);
+  z-index: 100;
+  display: none;
+  opacity: 0;
+}
+.sheet-overlay.visible {
+  display: block;
+}
+
+.glossary-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 430px;
+  max-height: 60dvh;
+  background: var(--cream);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 24px 32px;
+  z-index: 101;
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.glossary-sheet.visible {
+  display: flex;
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--cream-3);
+  border-radius: 2px;
+  align-self: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.sheet-abbr {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(191,92,44,0.08);
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.sheet-term {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--ink);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.sheet-def {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+/* ─── COMPLETION ─── */
+#done-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 12px;
+}
+
+.done-word {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 56px;
+  color: var(--accent);
+  opacity: 0;
+}
+
+.done-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink);
+  text-align: center;
+  opacity: 0;
+}
+
+.done-meta {
+  font-size: 12px;
+  color: var(--ink-3);
+  text-align: center;
+  opacity: 0;
+}
+
+.done-restart {
+  margin-top: 20px;
+  padding: 12px 32px;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processing-spinner {
+    animation: none;
+    border-top-color: var(--accent);
+  }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- UPLOAD SCREEN -->
+  <div id="upload-screen" class="screen active">
+    <h1 class="upload-title">KnitWise</h1>
+    <p class="upload-subtitle">Upload a pattern. We'll turn it into one step at a time.</p>
+
+    <p class="api-key-label">OpenAI API Key</p>
+    <div class="api-key-row">
+      <input type="password" id="api-key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-zone-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <p class="drop-zone-text">Drop a PDF or image here</p>
+      <p class="drop-zone-hint">or tap to browse</p>
+      <input type="file" class="file-input" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif">
+    </div>
+
+    <span class="or-divider">or</span>
+
+    <button class="paste-toggle" id="paste-toggle">Paste pattern text</button>
+
+    <div class="paste-area" id="paste-area">
+      <textarea id="paste-text" placeholder="Paste your knitting pattern here..."></textarea>
+      <button class="paste-submit" id="paste-submit">Read pattern</button>
+    </div>
+  </div>
+
+  <!-- PROCESSING SCREEN -->
+  <div id="processing-screen" class="screen">
+    <div class="processing-spinner"></div>
+    <p class="processing-label">Reading your pattern...</p>
+    <p class="processing-title" id="processing-title"></p>
+  </div>
+
+  <!-- ERROR SCREEN -->
+  <div id="error-screen" class="screen">
+    <div class="error-icon">!</div>
+    <h2 class="error-title">Something went wrong</h2>
+    <p class="error-message" id="error-message">We couldn't parse that pattern. Try pasting the text instead.</p>
+    <div class="error-actions">
+      <button class="btn-outline" id="error-back">Start over</button>
+      <button class="btn-solid" id="error-paste">Paste text instead</button>
+    </div>
+  </div>
+
+  <!-- SIZE PICKER SCREEN -->
+  <div id="size-screen" class="screen">
+    <div class="size-header">
+      <h2 id="size-pattern-title"></h2>
+      <p>Choose your size</p>
+    </div>
+    <div class="size-cards" id="size-cards"></div>
+  </div>
+
+  <!-- STEP READER SCREEN -->
+  <div id="reader-screen" class="screen">
+    <div class="reader-topbar">
+      <button class="topbar-back" id="reader-home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="topbar-title" id="reader-title"></span>
+      <span class="topbar-step" id="reader-step-label"></span>
+      <span class="topbar-size-chip" id="reader-size-chip"></span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <div class="reader-body" id="reader-body">
+      <div class="step-card-wrapper" id="step-card"></div>
+    </div>
+    <div class="reader-nav">
+      <button class="nav-back" id="nav-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-next" id="nav-next">
+        <span class="nav-next-text" id="nav-next-text">Next →</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="done-screen" class="screen">
+    <span class="done-word" id="done-word">Done.</span>
+    <span class="done-title" id="done-title"></span>
+    <span class="done-meta" id="done-meta"></span>
+    <button class="done-restart" id="done-restart">Start over</button>
+  </div>
+
+  <!-- GLOSSARY SHEET -->
+  <div class="sheet-overlay" id="sheet-overlay"></div>
+  <div class="glossary-sheet" id="glossary-sheet">
+    <div class="sheet-handle"></div>
+    <span class="sheet-abbr" id="sheet-abbr"></span>
+    <h3 class="sheet-term" id="sheet-term"></h3>
+    <p class="sheet-def" id="sheet-def"></p>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ─── State ───
+  let patternData = null;
+  let chosenSize = null;
+  let currentStep = 0;
+  let repeatProgress = {}; // stepId -> count
+
+  const SECTION_COLORS = ['#BF5C2C', '#2A6B5C', '#7B5EA7', '#5A7CA0', '#8B6B4A', '#4A7A6B'];
+  const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+
+  const SYSTEM_PROMPT = `You are a knitting pattern parser. Your job is to read a knitting pattern and return structured JSON — nothing else. No preamble, no explanation, no markdown fences. Return only valid JSON.
+
+The JSON must follow this exact schema:
+
+{
+  "title": string,
+  "description": string (1–2 sentences about what the item is),
+  "sizes": [
+    {
+      "label": string (e.g. "Small", "One size"),
+      "key": string (e.g. "S", "OS"),
+      "details": string (e.g. "53–58 cm head · 60 sts · 150g yarn")
+    }
+  ],
+  "materials": [
+    { "label": string, "value": string }
+  ],
+  "glossary": {
+    "term": {
+      "abbr": string or null,
+      "full": string or null,
+      "def": string (plain English explanation, 1–3 sentences, include a tactile description of how it feels or what it looks like in the fabric)
+    }
+  },
+  "steps": [
+    {
+      "id": number,
+      "section": string (e.g. "Cast on", "Body", "Shaping", "Finishing" — group related steps),
+      "label": string (short action title, e.g. "Cast on", "Work the body", "First decrease round"),
+      "instruction": string (the full instruction for this step, written in plain clear English, no abbreviations unless they are in the glossary),
+      "terms": [string] (list of glossary keys that appear in this step's instruction text),
+      "tip": string or null (a practical tip for this specific step — fibre behaviour, common mistakes, what to look for),
+      "type": "normal" | "repeat" | "length",
+      "repeatTotal": number or null (if type is "repeat", how many times to repeat),
+      "repeatLabel": string or null (e.g. "Decrease round"),
+      "lengthTarget": string or null (if type is "length", e.g. "57 cm"),
+      "sizeValues": object or null
+    }
+  ]
+}
+
+Rules for parsing:
+1. Each step should represent ONE thing that changes — a new stitch type, a decrease, a pickup, a finishing action. Never combine two different actions into one step.
+2. Repeated sections (e.g. "work same decreases for lining") must be their own steps, not references.
+3. Strip all abbreviation-only instructions and write them out in full in the instruction field. Put abbreviations in the glossary.
+4. If the pattern has size variants written as "60 (64) sts", extract them into sizeValues so the reader can display the right number for the chosen size.
+5. Add a tip for any step that involves a technique beginners commonly get wrong, or where mohair/delicate yarn requires special care.
+6. The glossary must include every technical term and abbreviation used in any instruction, including: k, p, k2tog, ssk, yo, m1, sl, pm, sm, rnd, sts, CO, BO, WS, RS, and any pattern-specific terms.
+7. If the pattern has no explicit size variants, create a single size with key "OS" (one size).`;
+
+  // ─── DOM refs ───
+  const $ = id => document.getElementById(id);
+  const screens = {
+    upload: $('upload-screen'),
+    processing: $('processing-screen'),
+    error: $('error-screen'),
+    size: $('size-screen'),
+    reader: $('reader-screen'),
+    done: $('done-screen')
+  };
+
+  function showScreen(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // ─── PHASE 1: UPLOAD ───
+  const dropZone = $('drop-zone');
+  const fileInput = $('file-input');
+  const pasteToggle = $('paste-toggle');
+  const pasteArea = $('paste-area');
+  const pasteText = $('paste-text');
+  const pasteSubmit = $('paste-submit');
+
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+
+  pasteToggle.addEventListener('click', () => {
+    pasteArea.classList.toggle('visible');
+    if (pasteArea.classList.contains('visible')) pasteText.focus();
+  });
+
+  pasteSubmit.addEventListener('click', () => {
+    const text = pasteText.value.trim();
+    if (!text) return;
+    processPattern({ type: 'text', content: text });
+  });
+
+  function handleFile(file) {
+    if (file.size > MAX_FILE_SIZE) {
+      showError('This file is too large. Please try a file under 30 MB, or paste the pattern text instead.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      let mediaType = file.type;
+
+      if (file.name.endsWith('.pdf')) {
+        mediaType = 'application/pdf';
+        processPattern({ type: 'pdf', data: base64, mediaType });
+      } else if (/^image\/(png|jpeg|jpg|gif|webp)/.test(mediaType)) {
+        processPattern({ type: 'image', data: base64, mediaType });
+      } else {
+        showError('Unsupported file type. Please upload a PDF or image file.');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ─── PHASE 2: PROCESSING ───
+  async function processPattern(input) {
+    const apiKey = $('api-key').value.trim();
+    if (!apiKey) {
+      showError('Please enter your OpenAI API key first.');
+      return;
+    }
+
+    showScreen('processing');
+    $('processing-title').textContent = '';
+
+    // Build OpenAI messages
+    let userParts = [];
+    if (input.type === 'text') {
+      userParts.push({ type: 'text', text: 'Parse this knitting pattern:\n\n' + input.content });
+    } else if (input.type === 'pdf') {
+      // OpenAI vision doesn't support PDF natively — convert to a file input message
+      // For PDFs, use the file content as a data URL for the input_file type
+      userParts.push({
+        type: 'file',
+        file: { filename: 'pattern.pdf', file_data: 'data:' + input.mediaType + ';base64,' + input.data }
+      });
+      userParts.push({ type: 'text', text: 'Parse this knitting pattern.' });
+    } else if (input.type === 'image') {
+      userParts.push({
+        type: 'image_url',
+        image_url: { url: 'data:' + input.mediaType + ';base64,' + input.data }
+      });
+      userParts.push({ type: 'text', text: 'Parse this knitting pattern.' });
+    }
+
+    try {
+      const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          max_tokens: 4000,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: userParts }
+          ]
+        })
+      });
+
+      if (!resp.ok) {
+        const errBody = await resp.text();
+        throw new Error('API error ' + resp.status + ': ' + errBody.slice(0, 200));
+      }
+
+      const data = await resp.json();
+      const choice = data.choices?.[0];
+      if (!choice || !choice.message?.content) throw new Error('No content in API response');
+
+      let raw = choice.message.content.trim();
+      // Strip markdown fences if present
+      raw = raw.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+
+      patternData = JSON.parse(raw);
+
+      if (!patternData.steps || !patternData.steps.length) {
+        throw new Error('No steps found in parsed pattern');
+      }
+
+      // Assign section colors
+      const sectionMap = {};
+      let colorIdx = 0;
+      patternData.steps.forEach(s => {
+        if (!sectionMap[s.section]) {
+          sectionMap[s.section] = SECTION_COLORS[colorIdx % SECTION_COLORS.length];
+          colorIdx++;
+        }
+        s._sectionColor = sectionMap[s.section];
+      });
+
+      // Reset state
+      currentStep = 0;
+      repeatProgress = {};
+      chosenSize = null;
+
+      if (patternData.sizes && patternData.sizes.length > 1) {
+        showSizePicker();
+      } else {
+        chosenSize = patternData.sizes?.[0]?.key || 'OS';
+        startReader();
+      }
+
+    } catch (err) {
+      console.error(err);
+      showError(err.message || 'We couldn\'t parse that pattern.');
+    }
+  }
+
+  function showError(msg) {
+    $('error-message').textContent = msg;
+    showScreen('error');
+  }
+
+  $('error-back').addEventListener('click', resetToUpload);
+  $('error-paste').addEventListener('click', () => {
+    resetToUpload();
+    pasteArea.classList.add('visible');
+    setTimeout(() => pasteText.focus(), 100);
+  });
+
+  function resetToUpload() {
+    patternData = null;
+    chosenSize = null;
+    currentStep = 0;
+    repeatProgress = {};
+    fileInput.value = '';
+    pasteText.value = '';
+    pasteArea.classList.remove('visible');
+    showScreen('upload');
+  }
+
+  // ─── PHASE 3: SIZE PICKER ───
+  function showSizePicker() {
+    $('size-pattern-title').textContent = patternData.title || 'Choose size';
+    const container = $('size-cards');
+    container.innerHTML = '';
+
+    patternData.sizes.forEach(size => {
+      const btn = document.createElement('button');
+      btn.className = 'size-card';
+      btn.innerHTML = `<span class="size-label">${esc(size.label)}</span>` +
+        (size.details ? `<span class="size-details">${esc(size.details)}</span>` : '');
+      btn.addEventListener('click', () => {
+        chosenSize = size.key;
+        startReader();
+      });
+      container.appendChild(btn);
+    });
+
+    showScreen('size');
+  }
+
+  // ─── PHASE 4: READER ───
+  function startReader() {
+    $('reader-title').textContent = patternData.title || 'Pattern';
+    const sizeObj = patternData.sizes?.find(s => s.key === chosenSize);
+    const chipEl = $('reader-size-chip');
+    if (sizeObj && patternData.sizes.length > 1) {
+      chipEl.textContent = sizeObj.label;
+      chipEl.style.display = '';
+    } else {
+      chipEl.style.display = 'none';
+    }
+    showScreen('reader');
+    renderStep(currentStep, 'none');
+  }
+
+  function renderStep(idx, direction) {
+    const step = patternData.steps[idx];
+    const total = patternData.steps.length;
+
+    // Update topbar instantly
+    $('reader-step-label').textContent = `Step ${idx + 1} of ${total}`;
+    $('progress-fill').style.width = ((idx + 1) / total * 100) + '%';
+
+    // Build card HTML
+    let html = '';
+
+    // Section label
+    html += `<div class="section-label">
+      <span class="section-dot" style="background:${step._sectionColor}"></span>
+      <span class="section-name">${esc(step.section)}</span>
+    </div>`;
+
+    html += `<div class="step-number">Step ${step.id || idx + 1}</div>`;
+    html += `<h2 class="step-label">${esc(step.label)}</h2>`;
+
+    // Resolve instruction with size values
+    let instruction = step.instruction || '';
+    if (step.sizeValues && chosenSize && step.sizeValues[chosenSize]) {
+      // Bold the chosen size value if it appears or append it
+      const val = step.sizeValues[chosenSize];
+      if (!instruction.includes(val)) {
+        instruction += ' (' + val + ')';
+      }
+    }
+
+    // Mark glossary terms
+    let instrHtml = esc(instruction);
+    if (step.terms && step.terms.length && patternData.glossary) {
+      // Sort by length descending to avoid partial matches
+      const sorted = [...step.terms].sort((a, b) => b.length - a.length);
+      sorted.forEach(term => {
+        if (patternData.glossary[term]) {
+          const regex = new RegExp('(?<![\\w-])' + escRegex(esc(term)) + '(?![\\w-])', 'gi');
+          instrHtml = instrHtml.replace(regex, match =>
+            `<span class="glossary-term" data-term="${esc(term)}">${match}</span>`
+          );
+        }
+      });
+    }
+
+    // Determine text size class
+    let sizeClass = '';
+    if (instruction.length > 300) sizeClass = ' very-long-text';
+    else if (instruction.length > 180) sizeClass = ' long-text';
+
+    html += `<div class="step-instruction${sizeClass}">${instrHtml}</div>`;
+
+    // Size value callout
+    if (step.sizeValues && chosenSize && step.sizeValues[chosenSize]) {
+      // Already included in instruction
+    }
+
+    // Repeat tracker
+    if (step.type === 'repeat' && step.repeatTotal) {
+      const done = repeatProgress[step.id] || 0;
+      const allDone = done >= step.repeatTotal;
+      html += `<div class="repeat-tracker">`;
+      html += `<div class="repeat-header">${esc(step.repeatLabel || 'Repeat')} — ${done} of ${step.repeatTotal}</div>`;
+      html += `<div class="repeat-pips">`;
+      for (let i = 0; i < step.repeatTotal; i++) {
+        html += `<span class="repeat-pip${i < done ? ' done' : ''}"></span>`;
+      }
+      html += `</div>`;
+      html += `<button class="repeat-btn${allDone ? ' all-done' : ''}" id="repeat-mark">${allDone ? 'All rounds complete' : 'Mark round done'}</button>`;
+      html += `</div>`;
+    }
+
+    // Length block
+    if (step.type === 'length' && step.lengthTarget) {
+      html += `<div class="length-block">
+        <div class="length-icon">📏</div>
+        <div class="length-text">Keep knitting until work measures</div>
+        <div class="length-value">${esc(step.lengthTarget)}</div>
+      </div>`;
+    }
+
+    // Tip
+    if (step.tip) {
+      html += `<div class="step-tip">${esc(step.tip)}</div>`;
+    }
+
+    const card = $('step-card');
+
+    // Animate
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (direction === 'none' || prefersReducedMotion) {
+      card.innerHTML = html;
+      attachCardListeners();
+      updateNav(idx);
+      $('reader-body').scrollTop = 0;
+      return;
+    }
+
+    const exitX = direction === 'forward' ? -28 : 28;
+    const enterX = direction === 'forward' ? 28 : -28;
+
+    card.animate([
+      { transform: 'translateX(0)', opacity: 1 },
+      { transform: `translateX(${exitX}px)`, opacity: 0 }
+    ], { duration: 160, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }).onfinish = () => {
+      card.innerHTML = html;
+      attachCardListeners();
+      updateNav(idx);
+      $('reader-body').scrollTop = 0;
+
+      card.animate([
+        { transform: `translateX(${enterX}px)`, opacity: 0 },
+        { transform: 'translateX(0)', opacity: 1 }
+      ], { duration: 200, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' });
+    };
+  }
+
+  function attachCardListeners() {
+    // Glossary terms
+    document.querySelectorAll('.glossary-term').forEach(el => {
+      el.addEventListener('click', () => openGlossary(el.dataset.term));
+    });
+
+    // Repeat button
+    const repeatBtn = document.getElementById('repeat-mark');
+    if (repeatBtn && !repeatBtn.classList.contains('all-done')) {
+      repeatBtn.addEventListener('click', () => {
+        const step = patternData.steps[currentStep];
+        if (!repeatProgress[step.id]) repeatProgress[step.id] = 0;
+        repeatProgress[step.id]++;
+        renderStep(currentStep, 'none');
+      });
+    }
+  }
+
+  function updateNav(idx) {
+    const step = patternData.steps[idx];
+    const total = patternData.steps.length;
+    const navBack = $('nav-back');
+    const navNext = $('nav-next');
+    const navText = $('nav-next-text');
+
+    navBack.classList.toggle('hidden', idx === 0);
+
+    // Check if repeat is locked
+    const isRepeat = step.type === 'repeat' && step.repeatTotal;
+    const done = repeatProgress[step.id] || 0;
+    const locked = isRepeat && done < step.repeatTotal;
+
+    navNext.classList.toggle('locked', locked);
+    if (locked) {
+      navText.textContent = `Complete all ${step.repeatTotal} rounds first`;
+    } else if (idx === total - 1) {
+      navText.textContent = 'Finish →';
+    } else {
+      navText.textContent = 'Next →';
+    }
+  }
+
+  $('nav-next').addEventListener('click', () => {
+    const step = patternData.steps[currentStep];
+    // Check lock
+    if (step.type === 'repeat' && step.repeatTotal) {
+      const done = repeatProgress[step.id] || 0;
+      if (done < step.repeatTotal) return;
+    }
+
+    if (currentStep < patternData.steps.length - 1) {
+      currentStep++;
+      renderStep(currentStep, 'forward');
+    } else {
+      showDone();
+    }
+  });
+
+  $('nav-back').addEventListener('click', () => {
+    if (currentStep > 0) {
+      currentStep--;
+      renderStep(currentStep, 'back');
+    }
+  });
+
+  $('reader-home').addEventListener('click', resetToUpload);
+
+  // ─── GLOSSARY SHEET ───
+  const overlay = $('sheet-overlay');
+  const sheet = $('glossary-sheet');
+
+  function openGlossary(termKey) {
+    const entry = patternData.glossary?.[termKey];
+    if (!entry) return;
+
+    const abbrEl = $('sheet-abbr');
+    if (entry.abbr) {
+      abbrEl.textContent = entry.abbr;
+      abbrEl.style.display = '';
+    } else {
+      abbrEl.style.display = 'none';
+    }
+
+    $('sheet-term').textContent = entry.full || termKey;
+    $('sheet-def').textContent = entry.def || '';
+
+    overlay.classList.add('visible');
+    sheet.classList.add('visible');
+
+    const prefersRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    overlay.animate([
+      { opacity: 0 }, { opacity: 1 }
+    ], { duration: prefersRM ? 0.01 : 300, easing: 'cubic-bezier(0.32,0.72,0,1)', fill: 'forwards' });
+
+    sheet.animate([
+      { transform: 'translateX(-50%) translateY(100%)' },
+      { transform: 'translateX(-50%) translateY(0)' }
+    ], { duration: prefersRM ? 0.01 : 300, easing: 'cubic-bezier(0.32,0.72,0,1)', fill: 'forwards' });
+  }
+
+  function closeGlossary() {
+    const prefersRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    overlay.animate([
+      { opacity: 1 }, { opacity: 0 }
+    ], { duration: prefersRM ? 0.01 : 220, fill: 'forwards' }).onfinish = () => {
+      overlay.classList.remove('visible');
+    };
+
+    sheet.animate([
+      { transform: 'translateX(-50%) translateY(0)' },
+      { transform: 'translateX(-50%) translateY(100%)' }
+    ], { duration: prefersRM ? 0.01 : 220, fill: 'forwards' }).onfinish = () => {
+      sheet.classList.remove('visible');
+    };
+  }
+
+  overlay.addEventListener('click', closeGlossary);
+
+  // ─── COMPLETION ───
+  function showDone() {
+    $('done-title').textContent = patternData.title || 'Your pattern';
+    const sizeObj = patternData.sizes?.find(s => s.key === chosenSize);
+    const sizeName = sizeObj ? sizeObj.label : '';
+    const stepCount = patternData.steps.length;
+    $('done-meta').textContent = (sizeName ? sizeName + ' · ' : '') + stepCount + ' steps';
+
+    showScreen('done');
+
+    const prefersRM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const els = [$('done-word'), $('done-title'), $('done-meta'), $('done-restart')];
+
+    els.forEach((el, i) => {
+      const delay = prefersRM ? 0 : i * 70;
+      const dur = prefersRM ? 0.01 : 350;
+      el.animate([
+        { transform: 'translateY(8px)', opacity: 0 },
+        { transform: 'translateY(0)', opacity: 1 }
+      ], { duration: dur, delay, easing: 'ease-out', fill: 'forwards' });
+    });
+  }
+
+  $('done-restart').addEventListener('click', resetToUpload);
+
+  // ─── Helpers ───
+  function esc(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function escRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+})();
+</script>
+</body>
+</html>

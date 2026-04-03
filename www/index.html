@@ -1,0 +1,2502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f7f7f4">
+<title>Knitwise</title>
+<link href="https://fonts.googleapis.com/css2?family=Sometype+Mono&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────
+   LOCAL FONT FACES
+───────────────────────────────────────── */
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('fonts/AppleGaramond-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('fonts/AppleGaramond.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('fonts/AppleGaramond-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('fonts/AppleGaramond-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('fonts/AppleGaramond-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Apple Garamond';
+  src: url('fonts/AppleGaramond-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SF Pro Rounded';
+  src: url('fonts/SF-Pro-Rounded-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─────────────────────────────────────────
+   RESET & CUSTOM PROPERTIES
+───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #f7f7f4;
+  --surface:     #ffffff;
+  --border-thin: #888787;
+  --border-med:  #ddd;
+  --accent:      #ffa81d;
+  --text:        #000000;
+  --text-2:      #5b5b5b;
+  --text-3:      #888787;
+  --muted-fill:  rgba(118,118,128,0.12);
+  --watermark:   rgba(136,135,135,0.35);
+
+  --glass-bg:    rgba(255,255,255,0.72);
+  --glass-bg-heavy: rgba(255,255,255,0.88);
+  --glass-border: rgba(136,135,135,0.2);
+  --glass-inset: rgba(255,255,255,0.5);
+  --glass-shadow: rgba(0,0,0,0.06);
+  --glass-popover: rgba(255,255,255,0.82);
+  --glass-popover-tint: rgba(245,245,242,0.5);
+  --glass-arrow: rgba(250,250,248,0.92);
+  --bar-track:   rgba(120,120,120,0.2);
+  --bar-fill:    #1a1a1a;
+  --pip-bg:      rgba(120,120,120,0.15);
+  --grabber:     rgba(0,0,0,0.12);
+  --ruled-line:  rgba(0,0,0,0.06);
+  --placeholder: rgba(60,60,67,0.3);
+  --topbar-bg:   rgba(247,247,244,0.85);
+  --processing-text: rgba(0,0,0,0.84);
+  --shimmer-peak: rgba(255,255,255,0.85);
+  --btn-glass-bg: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.45) 100%);
+  --btn-glass-tint: #f7f7f7;
+  --btn-glass-amber-bg: rgba(255,255,255,0.75);
+
+  --font-serif:  'Apple Garamond', 'Garamond', 'Georgia', serif;
+  --font-body:   'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'Nunito', sans-serif;
+  --font-mono:   'Sometype Mono', monospace;
+
+  --ease-out:      cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out:   cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer:   cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-fast:   160ms;
+  --motion-base:   200ms;
+  --motion-sheet:  330ms;
+
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --kb-height:   0px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:          #1a1a1a;
+    --surface:     #2a2a2a;
+    --border-thin: #444;
+    --border-med:  #3a3a3a;
+    --accent:      #ffb940;
+    --text:        #e8e8e6;
+    --text-2:      #a0a0a0;
+    --text-3:      #6b6b6b;
+    --muted-fill:  rgba(255,255,255,0.08);
+    --watermark:   rgba(255,255,255,0.08);
+
+    --glass-bg:    rgba(40,40,40,0.72);
+    --glass-bg-heavy: rgba(35,35,35,0.92);
+    --glass-border: rgba(255,255,255,0.08);
+    --glass-inset: rgba(255,255,255,0.06);
+    --glass-shadow: rgba(0,0,0,0.3);
+    --glass-popover: rgba(42,42,42,0.88);
+    --glass-popover-tint: rgba(50,50,50,0.5);
+    --glass-arrow: rgba(48,48,48,0.92);
+    --bar-track:   rgba(255,255,255,0.12);
+    --bar-fill:    #e8e8e6;
+    --pip-bg:      rgba(255,255,255,0.1);
+    --grabber:     rgba(255,255,255,0.15);
+    --ruled-line:  rgba(255,255,255,0.06);
+    --placeholder: rgba(255,255,255,0.25);
+    --topbar-bg:   rgba(26,26,26,0.85);
+    --processing-text: rgba(255,255,255,0.84);
+    --shimmer-peak: rgba(255,255,255,0.25);
+    --btn-glass-bg: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    --btn-glass-tint: #2a2a2a;
+    --btn-glass-amber-bg: rgba(255,255,255,0.12);
+  }
+}
+
+/* ─────────────────────────────────────────
+   BASE
+───────────────────────────────────────── */
+html {
+  height: 100%;
+  background: var(--bg);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-serif);
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  overflow: hidden;
+  position: relative;
+}
+
+button {
+  font-family: var(--font-body);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ─────────────────────────────────────────
+   LIQUID GLASS BUTTONS
+───────────────────────────────────────── */
+.btn-glass {
+  position: relative;
+  border-radius: 1000px;
+  padding: 14px 28px;
+  font-size: 17px;
+  font-weight: 510;
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  box-shadow: 0px 8px 40px rgba(0,0,0,0.12);
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--btn-glass-bg);
+  mix-blend-mode: normal;
+  z-index: -3;
+}
+.btn-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--btn-glass-tint);
+  mix-blend-mode: darken;
+  z-index: -1;
+}
+@media (prefers-color-scheme: dark) {
+  .btn-glass::after { mix-blend-mode: lighten; }
+}
+.btn-glass:active { transform: scale(0.97); }
+
+/* Amber tinted glass */
+.btn-glass-amber {
+  color: #fff;
+}
+.btn-glass-amber::before {
+  background: var(--btn-glass-amber-bg);
+  mix-blend-mode: saturation;
+}
+.btn-glass-amber::after {
+  background: var(--accent);
+  mix-blend-mode: normal;
+}
+
+/* ─────────────────────────────────────────
+   SCREENS
+───────────────────────────────────────── */
+.screen { display: none; flex-direction: column; background: var(--bg); flex: 1; min-height: 0; }
+.screen.active { display: flex; }
+
+/* ─────────────────────────────────────────
+   HOME / LIBRARY SCREEN
+───────────────────────────────────────── */
+#screen-home {
+  padding: calc(60px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
+}
+.home-header {
+  flex-shrink: 0;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+.home-title {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  line-height: 1;
+  color: var(--text-3);
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 50ms forwards;
+}
+.home-sub {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--text-2);
+  margin-top: 6px;
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 100ms forwards;
+}
+.home-list {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+.home-card {
+  position: relative;
+  background: var(--glass-bg);
+  border: 0.4px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 18px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  overflow: hidden;
+  isolation: isolate;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  box-shadow: 0 2px 16px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
+  opacity: 0;
+  animation: fadeUp 280ms var(--ease-out) forwards;
+}
+.home-card:active { transform: scale(0.97); }
+.home-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-card-title {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 510;
+  color: var(--text);
+  line-height: 1.3;
+  flex: 1;
+}
+.home-card-size {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--muted-fill);
+  border-radius: 6px;
+  padding: 3px 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.home-card-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.home-card-progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--muted-fill);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.home-card-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 300ms var(--ease-out);
+}
+.home-card-step {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.home-card-time {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-3);
+}
+.home-card-delete {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 16px;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity var(--motion-fast) var(--ease-out), background var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .home-card-delete { opacity: 0; }
+  .home-card:hover .home-card-delete { opacity: 1; }
+}
+.home-card-delete:active { background: var(--muted-fill); transform: scale(0.9); }
+
+.home-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  padding: 32px 24px;
+  opacity: 0;
+  animation: fadeUp 320ms var(--ease-out) 120ms forwards;
+}
+.home-empty-icon {
+  color: var(--text-3);
+  opacity: 0.5;
+  margin-bottom: 4px;
+}
+.home-empty-text {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--text-2);
+}
+.home-empty-hint {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  color: var(--text-3);
+  max-width: 280px;
+  line-height: 1.5;
+}
+.home-actions {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 0;
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 180ms forwards;
+}
+.home-new-btn {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* ─────────────────────────────────────────
+   UPLOAD SCREEN
+───────────────────────────────────────── */
+#screen-upload {
+  position: relative;
+  padding: calc(60px + var(--safe-top)) 24px calc(40px + var(--safe-bottom));
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.upload-back-btn {
+  position: absolute;
+  top: calc(16px + var(--safe-top));
+  left: 20px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background var(--motion-fast) var(--ease-out);
+  z-index: 10;
+}
+.upload-back-btn:active { background: rgba(255,168,29,0.1); transform: scale(0.97); }
+.upload-title {
+  font-family: var(--font-serif);
+  font-size: 64px;
+  line-height: 1;
+  color: var(--text-3);
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 50ms forwards;
+}
+.upload-sub {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  color: var(--text);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.5;
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 100ms forwards;
+}
+
+.drop-zone {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 0.4px solid var(--border-thin);
+  border-radius: 12px;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color var(--motion-base) var(--ease-out), background var(--motion-base) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  opacity: 0;
+  animation: fadeUp 320ms var(--ease-out) 160ms forwards;
+}
+.drop-zone:active { transform: scale(0.97); }
+.drop-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(255,168,29,0.04);
+}
+@media (hover: hover) and (pointer: fine) {
+  .drop-zone:hover { border-color: var(--text-2); }
+}
+
+.drop-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  border: 0.4px solid var(--border-thin);
+  display: flex; align-items: center; justify-content: center;
+}
+.drop-icon svg { width: 22px; height: 22px; color: var(--text-3); }
+
+.drop-text {
+  font-family: var(--font-serif);
+  font-size: 20px; color: var(--text); text-align: center;
+}
+.drop-hint {
+  font-family: var(--font-serif);
+  font-size: 14px; color: var(--text-3);
+}
+
+.file-input { display: none; }
+
+.or-divider {
+  font-family: var(--font-mono);
+  font-size: 10px; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.14em;
+  flex-shrink: 0;
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 220ms forwards;
+}
+
+.paste-toggle {
+  font-family: var(--font-serif);
+  font-size: 16px; color: var(--accent);
+  padding: 8px 16px; border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 150ms var(--ease-out), transform 160ms var(--ease-out);
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 260ms forwards;
+}
+.paste-toggle:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .paste-toggle:hover { background: rgba(255,168,29,0.08); }
+}
+
+.paste-area {
+  width: 100%; max-width: 400px;
+  display: flex; flex-direction: column;
+  gap: 12px; flex-shrink: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  overflow: hidden;
+  transition: max-height 240ms var(--ease-out), opacity var(--motion-base) var(--ease-out), transform var(--motion-base) var(--ease-out);
+}
+.paste-area.visible {
+  max-height: 320px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.paste-area textarea {
+  width: 100%; min-height: 120px; max-height: 180px;
+  padding: 14px;
+  border: 0.4px solid var(--border-thin);
+  border-radius: 12px; background: var(--surface);
+  color: var(--text); font-family: var(--font-serif);
+  font-size: 16px; line-height: 1.6; resize: none; outline: none;
+  transition: border-color var(--motion-base) var(--ease-out);
+}
+.paste-area textarea:focus { border-color: var(--accent); }
+.paste-area textarea::placeholder { color: var(--text-3); }
+
+.paste-submit {
+  align-self: flex-end;
+}
+
+.upload-continue {
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 300ms forwards;
+}
+
+/* ─────────────────────────────────────────
+   PROCESSING SCREEN
+───────────────────────────────────────── */
+#screen-processing {
+  align-items: center; justify-content: center;
+  padding: 32px 24px; gap: 24px;
+}
+.processing-label {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  text-align: center;
+  min-height: 3.2em;
+  max-width: 420px;
+  line-height: 1.4;
+  opacity: 1;
+  transition: opacity 320ms var(--ease-out);
+  color: var(--processing-text);
+}
+.processing-label::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    transparent 42%,
+    var(--shimmer-peak) 50%,
+    transparent 58%,
+    transparent 100%
+  );
+  background-size: 230% 100%;
+  background-position: 120% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: processingShimmer 2600ms linear infinite;
+}
+.processing-bar-track {
+  position: fixed;
+  bottom: 40px;
+  left: 24px;
+  right: 24px;
+  height: 6px;
+  background: var(--bar-track);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.processing-bar-fill {
+  height: 100%;
+  background: var(--bar-fill);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 180ms linear;
+}
+@keyframes processingShimmer {
+  0%   { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+
+/* ─────────────────────────────────────────
+   ERROR SCREEN
+───────────────────────────────────────── */
+#screen-error {
+  align-items: center; justify-content: center;
+  padding: 32px 24px; gap: 16px; text-align: center;
+}
+.error-title {
+  font-family: var(--font-serif);
+  font-size: 28px; color: var(--text);
+}
+.error-message {
+  font-family: var(--font-serif);
+  font-size: 18px; color: var(--text-2);
+  max-width: 320px; line-height: 1.6;
+}
+.error-actions { display: flex; gap: 12px; margin-top: 8px; }
+
+/* ─────────────────────────────────────────
+   SIZE PICKER SCREEN
+───────────────────────────────────────── */
+#screen-size {
+  padding: calc(40px + var(--safe-top)) 24px calc(48px + var(--safe-bottom));
+}
+.sp-title {
+  font-family: var(--font-serif);
+  font-size: 40px; line-height: 1.15; color: var(--text);
+  margin-bottom: 6px;
+  opacity: 0; animation: fadeUp 300ms var(--ease-out) 50ms forwards;
+}
+.sp-sub {
+  font-family: var(--font-serif);
+  font-size: 20px; color: var(--text-2); margin-bottom: 24px;
+  opacity: 0; animation: fadeUp 300ms var(--ease-out) 100ms forwards;
+}
+.sp-label {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-3);
+  margin-bottom: 16px;
+  opacity: 0; animation: fadeUp 300ms var(--ease-out) 140ms forwards;
+}
+.sp-cards {
+  display: flex; flex-direction: column; gap: 12px; flex: 1;
+}
+.sp-card {
+  flex: 1;
+  border: 0.4px solid var(--border-thin);
+  border-radius: 12px;
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: flex-end;
+  padding: 20px 24px;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: border-color var(--motion-base) var(--ease-out), background var(--motion-base) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  opacity: 0;
+}
+.sp-card:nth-child(1) { animation: fadeUp 320ms var(--ease-out) 200ms forwards; }
+.sp-card:nth-child(2) { animation: fadeUp 320ms var(--ease-out) 250ms forwards; }
+.sp-card:nth-child(3) { animation: fadeUp 320ms var(--ease-out) 300ms forwards; }
+.sp-card:nth-child(4) { animation: fadeUp 320ms var(--ease-out) 350ms forwards; }
+@media (hover: hover) and (pointer: fine) {
+  .sp-card:hover { border-color: var(--text-2); }
+}
+.sp-card:active { transform: scale(0.97); }
+
+.sp-card-size {
+  font-family: var(--font-serif);
+  font-size: 128px; line-height: 1; color: var(--watermark);
+  position: absolute; top: -10px; right: 16px;
+  pointer-events: none;
+}
+.sp-card-label {
+  font-family: var(--font-serif);
+  font-size: 32px; color: var(--text);
+}
+.sp-card-range {
+  font-family: var(--font-serif);
+  font-size: 14px; color: var(--text-3); margin-top: 2px;
+}
+
+/* ─────────────────────────────────────────
+   STEP READER SCREEN
+───────────────────────────────────────── */
+#screen-step { overflow: hidden; }
+
+/* Top bar */
+.step-topbar {
+  margin: calc(12px + var(--safe-top)) 16px 0;
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  border: 1px solid var(--border-med);
+  border-radius: 10px;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.topbar-pattern {
+  font-family: var(--font-serif);
+  font-size: 40px; line-height: 1.1;
+  color: var(--text);
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-size-chip {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px; border-radius: 10px;
+  background: var(--surface);
+  border: 0.4px solid var(--border-thin);
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+/* Meta row: section + step counter + progress */
+.step-meta-row {
+  padding: 14px 20px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.section-badge {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 500;
+  color: var(--text);
+  padding: 5px 14px;
+  border-radius: 100px;
+  background: var(--muted-fill);
+}
+.step-counter-group {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+.step-counter {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.progress-track {
+  width: 80px; height: 3px;
+  background: var(--bar-track);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--text);
+  border-radius: 2px;
+  transition: width 300ms var(--ease-out);
+}
+
+/* Step card */
+.step-card-wrap {
+  flex: 1; padding: 20px 20px 16px;
+  display: flex; flex-direction: column;
+  min-height: 0; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.step-card { will-change: transform, opacity; }
+
+.step-instruction {
+  font-family: var(--font-body);
+  font-size: 32px;
+  line-height: 1.45;
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* Glossary term highlight */
+.term {
+  color: var(--accent);
+  text-decoration: underline wavy var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 120ms var(--ease-out);
+  border-radius: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .term:hover { color: #d48c00; }
+}
+
+.step-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  word-break: break-all;
+}
+
+/* Repeat block */
+.repeat-block {
+  margin-top: 24px;
+  background: var(--surface);
+  border: 0.4px solid var(--border-thin);
+  border-radius: 12px;
+  padding: 18px 20px; display: none;
+}
+.repeat-block.visible { display: block; }
+.repeat-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-3); margin-bottom: 10px;
+}
+.repeat-pips { display: flex; gap: 6px; margin-bottom: 14px; }
+.pip {
+  flex: 1; height: 5px; border-radius: 3px;
+  background: var(--pip-bg);
+  transition: background 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.pip.done { background: var(--accent); }
+
+.repeat-mark-btn {
+  width: 100%; padding: 12px;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 510;
+  cursor: pointer;
+  border-radius: 1000px;
+  border: none;
+  background: var(--text);
+  color: #fff;
+  transition: transform var(--motion-fast) var(--ease-out), opacity 150ms var(--ease-out);
+}
+.repeat-mark-btn:active { transform: scale(0.97); }
+.repeat-mark-btn:disabled {
+  background: var(--text-3); cursor: not-allowed; opacity: 0.5;
+}
+
+/* Tip */
+.step-tip {
+  margin-top: 18px;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.6;
+  color: var(--text-3); padding-left: 14px;
+  border-left: 2px solid var(--border-med);
+}
+
+/* Notes button in nav */
+.nav-notes {
+  width: 52px; height: 52px; flex-shrink: 0;
+  color: var(--text-2);
+  padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Notes page */
+#screen-notes {
+  padding: calc(12px + var(--safe-top)) 16px calc(20px + var(--safe-bottom));
+  overflow: hidden;
+  max-height: calc(100% - var(--kb-height));
+  transition: max-height 200ms var(--ease-out);
+}
+.notes-page-shell {
+  flex: 1;
+  min-height: 0;
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 26px;
+  box-shadow: 0 10px 60px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeUp 260ms var(--ease-drawer);
+}
+
+.notes-header {
+  flex-shrink: 0;
+  padding: 0 24px;
+}
+.notes-grabber {
+  width: 36px; height: 5px;
+  background: var(--grabber);
+  border-radius: 3px;
+  margin: 10px auto 16px;
+}
+.notes-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.notes-title {
+  font-family: var(--font-body);
+  font-size: 24px; font-weight: 510;
+  color: var(--text);
+}
+.notes-close-btn {
+  width: 36px; height: 36px;
+  padding: 0;
+  font-size: 20px;
+  color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.notes-body {
+  flex: 1; min-height: 0;
+  position: relative;
+  padding: 0 24px calc(24px + var(--safe-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.notes-textarea {
+  width: 100%;
+  min-height: 320px;
+  border: 0; outline: 0; resize: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 32px;
+  padding: 7px 0 0;
+  position: relative;
+  z-index: 1;
+  caret-color: var(--accent);
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 31px,
+    var(--ruled-line) 31px,
+    var(--ruled-line) 32px
+  );
+  background-size: 100% 32px;
+  background-attachment: local;
+  background-origin: content-box;
+}
+.notes-textarea::placeholder {
+  color: var(--placeholder);
+  font-style: italic;
+}
+
+/* Nav */
+.step-nav {
+  padding: 0 20px calc(32px + var(--safe-bottom));
+  display: flex; gap: 10px; flex-shrink: 0;
+}
+.nav-prev {
+  width: 56px; height: 52px; flex-shrink: 0;
+  font-size: 18px;
+  color: var(--text-2);
+}
+.nav-next {
+  flex: 1; height: 52px;
+}
+
+/* ─────────────────────────────────────────
+   DONE SCREEN
+───────────────────────────────────────── */
+#screen-done {
+  align-items: center; justify-content: center;
+  padding: 40px 24px 60px; text-align: center; gap: 8px;
+}
+.done-word {
+  font-family: var(--font-serif);
+  font-style: italic; font-size: 72px;
+  color: var(--accent); line-height: 1;
+}
+.done-name {
+  font-family: var(--font-serif);
+  font-size: 20px; color: var(--text); margin-top: 8px;
+}
+.done-meta {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--text-3);
+  letter-spacing: 0.08em; margin-top: 2px;
+}
+.done-restart {
+  margin-top: 36px;
+}
+
+/* ─────────────────────────────────────────
+   GLOSSARY POPOVER (Apple HIG style)
+───────────────────────────────────────── */
+.gl-backdrop {
+  position: fixed; inset: 0;
+  z-index: 100; opacity: 0; pointer-events: none;
+  transition: opacity var(--motion-base) var(--ease-out);
+}
+.gl-backdrop.open { opacity: 1; pointer-events: all; }
+
+.gl-popover {
+  position: fixed;
+  width: calc(100% - 32px);
+  max-width: 360px;
+  left: 16px;
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  border-radius: 22px;
+  padding: 0;
+  z-index: 101;
+  box-shadow: 0 10px 80px rgba(0,0,0,0.18), 0 2px 16px rgba(0,0,0,0.08);
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 180ms var(--ease-out), opacity var(--motion-base) var(--ease-out);
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+}
+.gl-popover-inner {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 28px 24px 0;
+}
+.gl-popover::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 22px;
+  background: var(--glass-popover);
+  backdrop-filter: blur(65px);
+  -webkit-backdrop-filter: blur(65px);
+  z-index: -2;
+}
+.gl-popover::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 22px;
+  background: var(--glass-popover-tint);
+  z-index: -1;
+}
+
+/* Arrow / caret */
+.gl-arrow {
+  position: absolute;
+  width: 24px; height: 12px;
+  top: -12px;
+  left: 40px; /* default, repositioned by JS */
+  overflow: visible;
+  z-index: 102;
+  filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.04));
+}
+.gl-arrow svg {
+  width: 24px; height: 12px;
+  fill: var(--glass-arrow);
+}
+
+.gl-backdrop.open .gl-popover {
+  transform: scale(1);
+  opacity: 1;
+}
+.gl-backdrop:not(.open) .gl-popover {
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform 180ms var(--ease-out), opacity 140ms var(--ease-out);
+}
+
+.gl-term {
+  font-family: var(--font-body);
+  font-size: 28px; font-weight: 400;
+  color: var(--text); line-height: 1.2;
+  margin-bottom: 10px;
+}
+.gl-def {
+  font-family: var(--font-body);
+  font-size: 20px; font-weight: 400;
+  line-height: 1.55; color: var(--text-3);
+  margin-bottom: 14px;
+}
+.gl-context,
+.gl-beginner,
+.gl-example {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-2);
+  margin-bottom: 10px;
+}
+.gl-context {
+  padding-left: 12px;
+  border-left: 2px solid var(--border-med);
+}
+.gl-beginner {
+  background: rgba(255,185,64,0.1);
+  border: 0.4px solid rgba(255,185,64,0.25);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.gl-close-wrap {
+  display: flex; justify-content: flex-end;
+  flex-shrink: 0;
+  padding: 12px 24px 20px;
+}
+.gl-close-btn {
+  /* inherits btn-glass */
+}
+
+/* ─────────────────────────────────────────
+   ENTRY ANIMATIONS
+───────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─────────────────────────────────────────
+   REDUCED MOTION
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .gl-popover,
+  .gl-backdrop { transition: opacity 0.01ms !important; }
+  .processing-label::after { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HOME / LIBRARY ── -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <div class="home-title">Knitwise</div>
+    <div class="home-sub">Your patterns</div>
+  </div>
+  <div class="home-list" id="home-list"></div>
+  <div class="home-empty" id="home-empty" style="display:none">
+    <div class="home-empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div class="home-empty-text">No patterns yet</div>
+    <div class="home-empty-hint">Upload your first pattern and we'll save your progress here.</div>
+  </div>
+  <div class="home-actions">
+    <button class="btn-glass btn-glass-amber home-new-btn" id="home-new-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Pattern
+    </button>
+  </div>
+</div>
+
+<!-- ── UPLOAD ── -->
+<div id="screen-upload" class="screen">
+  <button class="upload-back-btn" id="upload-back">&larr; Library</button>
+  <div class="upload-title">Knitwise</div>
+  <div class="upload-sub">Upload a pattern. We'll turn it into one step at a time.</div>
+  <div class="drop-zone" id="drop-zone">
+    <div class="drop-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    <div class="drop-text">Drop a PDF or an image here</div>
+    <div class="drop-hint">or tap to browse</div>
+    <input type="file" class="file-input" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif">
+  </div>
+  <div class="or-divider">or</div>
+  <button class="paste-toggle" id="paste-toggle">Paste pattern text</button>
+  <div class="paste-area" id="paste-area">
+    <textarea id="paste-text" placeholder="Paste your knitting pattern here..."></textarea>
+    <button class="btn-glass paste-submit" id="paste-submit">Read pattern</button>
+  </div>
+</div>
+
+<!-- ── PROCESSING ── -->
+<div id="screen-processing" class="screen">
+  <div class="processing-label" id="processing-label">Reading your pattern</div>
+  <div class="processing-bar-track">
+    <div class="processing-bar-fill" id="processing-bar-fill"></div>
+  </div>
+</div>
+
+<!-- ── ERROR ── -->
+<div id="screen-error" class="screen">
+  <div class="error-title">Something went wrong</div>
+  <div class="error-message" id="error-message"></div>
+  <div class="error-actions">
+    <button class="btn-glass" id="error-back">Start over</button>
+    <button class="btn-glass btn-glass-amber" id="error-paste">Paste text instead</button>
+  </div>
+</div>
+
+<!-- ── SIZE PICKER ── -->
+<div id="screen-size" class="screen">
+  <div class="sp-title" id="sp-title"></div>
+  <div class="sp-sub" id="sp-sub">Choose your size</div>
+  <div class="sp-label">Choose a size</div>
+  <div class="sp-cards" id="sp-cards"></div>
+</div>
+
+<!-- ── STEP READER ── -->
+<div id="screen-step" class="screen">
+  <div class="step-topbar">
+    <div class="topbar-pattern" id="topbar-pattern"></div>
+    <div class="topbar-size-chip" id="size-chip"></div>
+  </div>
+  <div class="step-meta-row">
+    <div class="section-badge" id="section-label"></div>
+    <div class="step-counter-group">
+      <div class="step-counter" id="topbar-pos"></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="step-card-wrap">
+    <div class="step-card" id="step-card">
+      <div class="step-instruction" id="step-instruction"></div>
+      <div class="repeat-block" id="repeat-block">
+        <div class="repeat-label" id="repeat-label"></div>
+        <div class="repeat-pips" id="repeat-pips"></div>
+        <button class="repeat-mark-btn" id="repeat-mark-btn">Mark this round done</button>
+      </div>
+      <div class="step-tip" id="step-tip" style="display:none"></div>
+    </div>
+  </div>
+  <div class="step-nav">
+    <button class="btn-glass nav-prev" id="nav-prev" disabled>&#8592;</button>
+    <button class="btn-glass nav-notes" id="nav-notes">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+    </button>
+    <button class="btn-glass btn-glass-amber nav-next" id="nav-next">Next Step</button>
+  </div>
+</div>
+
+<!-- ── NOTES PAGE ── -->
+<div id="screen-notes" class="screen">
+  <div class="notes-page-shell">
+    <div class="notes-header">
+      <div class="notes-grabber"></div>
+      <div class="notes-title-row">
+        <div class="notes-title">Row Notes</div>
+        <button class="btn-glass notes-close-btn" id="notes-page-close">&times;</button>
+      </div>
+    </div>
+    <div class="notes-body">
+      <textarea id="journey-notes" class="notes-textarea" placeholder="Jot something down — tension, yarn swaps, where you left off..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ── DONE ── -->
+<div id="screen-done" class="screen">
+  <div class="done-word">Done.</div>
+  <div class="done-name" id="done-name"></div>
+  <div class="done-meta" id="done-meta"></div>
+  <button class="btn-glass done-restart" id="done-restart">Back to library</button>
+</div>
+
+<!-- ── GLOSSARY POPOVER ── -->
+<div class="gl-backdrop" id="gl-backdrop">
+  <div class="gl-popover" id="gl-popover">
+    <div class="gl-arrow" id="gl-arrow">
+      <svg viewBox="0 0 24 12" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10.59 1.41a2 2 0 0 1 2.82 0L24 12H0L10.59 1.41z"/>
+      </svg>
+    </div>
+    <div class="gl-popover-inner" id="gl-popover-inner">
+      <div class="gl-term" id="gl-term"></div>
+      <div class="gl-def" id="gl-def"></div>
+      <div class="gl-context" id="gl-context"></div>
+      <div class="gl-beginner" id="gl-beginner"></div>
+      <div class="gl-example" id="gl-example"></div>
+    </div>
+    <div class="gl-close-wrap">
+      <button class="btn-glass gl-close-btn" id="gl-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /** Same-origin on web; packaged WebView falls back to production API (no client-side API keys). */
+  var API_ORIGIN = (function() {
+    try {
+      var o = window.location && window.location.origin;
+      if (o && o !== 'null' && window.location.protocol && window.location.protocol !== 'file:') return o;
+    } catch (e) {}
+    return 'https://knitwise.xyz';
+  })();
+
+  let patternData = null;
+  let chosenSizeKey = null;
+  let steps = [];
+  let idx = 0;
+  let repeatProgress = {};
+  let sectionColorMap = {};
+  let journeyNotes = '';
+  let activePatternId = null;
+
+  const SECTION_COLORS = ['accent', 'teal', 'muted'];
+  const MAX_FILE_SIZE = 30 * 1024 * 1024;
+  const LIB_KEY = 'knitwise:library';
+
+  // ─── PERSISTENCE LAYER ───
+  function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function loadLibrary() {
+    try {
+      return JSON.parse(localStorage.getItem(LIB_KEY)) || [];
+    } catch (_) { return []; }
+  }
+
+  function saveLibrary(lib) {
+    try { localStorage.setItem(LIB_KEY, JSON.stringify(lib)); } catch (_) {}
+  }
+
+  function patternKey(id) { return 'knitwise:pattern:' + id; }
+
+  function loadPatternEntry(id) {
+    try { return JSON.parse(localStorage.getItem(patternKey(id))); } catch (_) { return null; }
+  }
+
+  function savePatternEntry(id, entry) {
+    try { localStorage.setItem(patternKey(id), JSON.stringify(entry)); } catch (_) {}
+  }
+
+  function deletePatternEntry(id) {
+    try { localStorage.removeItem(patternKey(id)); } catch (_) {}
+  }
+
+  function updateLibraryMeta(id, updates) {
+    const lib = loadLibrary();
+    const item = lib.find(p => p.id === id);
+    if (item) {
+      Object.assign(item, updates);
+      saveLibrary(lib);
+    }
+  }
+
+  let _saveDebounce = null;
+  function debouncedSaveProgress() {
+    if (_saveDebounce) clearTimeout(_saveDebounce);
+    _saveDebounce = setTimeout(function() {
+      _saveDebounce = null;
+      if (!activePatternId) return;
+      const entry = loadPatternEntry(activePatternId);
+      if (!entry) return;
+      entry.currentStep = idx;
+      entry.repeatProgress = repeatProgress;
+      entry.journeyNotes = journeyNotes;
+      savePatternEntry(activePatternId, entry);
+      updateLibraryMeta(activePatternId, {
+        currentStep: idx,
+        lastOpenedAt: Date.now()
+      });
+    }, 500);
+  }
+
+  function immediatelySaveProgress() {
+    if (_saveDebounce) { clearTimeout(_saveDebounce); _saveDebounce = null; }
+    if (!activePatternId) return;
+    const entry = loadPatternEntry(activePatternId);
+    if (!entry) return;
+    entry.currentStep = idx;
+    entry.repeatProgress = repeatProgress;
+    entry.journeyNotes = journeyNotes;
+    savePatternEntry(activePatternId, entry);
+    updateLibraryMeta(activePatternId, {
+      currentStep: idx,
+      lastOpenedAt: Date.now()
+    });
+  }
+
+  function migrateLegacyNotes(id) {
+    const entry = loadPatternEntry(id);
+    if (!entry || entry.journeyNotes) return;
+    const title = (entry.patternData?.title || 'pattern').trim().toLowerCase();
+    const size = (entry.chosenSizeKey || 'os').trim().toLowerCase();
+    const legacyKey = 'knitwise:notes:' + title + ':' + size;
+    try {
+      const legacy = localStorage.getItem(legacyKey);
+      if (legacy) {
+        entry.journeyNotes = legacy;
+        savePatternEntry(id, entry);
+        localStorage.removeItem(legacyKey);
+      }
+    } catch (_) {}
+  }
+
+  function relativeTime(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'd ago';
+    const weeks = Math.floor(days / 7);
+    return weeks + 'w ago';
+  }
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') immediatelySaveProgress();
+  });
+
+  const SYSTEM_PROMPT = `Return ONLY valid JSON (no preamble, no fences). Parse the knitting pattern into:
+{"title":string,"description":string,"sizes":[{"label":string,"key":string,"details":string}],"materials":[{"label":string,"value":string}],"glossary":{"term":{"abbr":string|null,"full":string|null,"def":string,"beginner":string|null,"whenToUse":string|null,"example":string|null}},"steps":[{"id":number,"section":string,"label":string,"instruction":string,"terms":[string],"tip":string|null,"type":"normal"|"repeat"|"length","repeatTotal":number|null,"repeatLabel":string|null,"lengthTarget":string|null,"sizeValues":object|null}]}
+
+INPUT HANDLING:
+- The input may be messy, OCR-extracted, poorly formatted, with broken lines or inconsistent spacing.
+- Intelligently clean and interpret the input. NEVER output raw or messy pattern text without restructuring it.
+- DO NOT invent instructions — only interpret what is actually present in the pattern.
+- If something is ambiguous, make a reasonable assumption and note it in the step's "tip" field.
+
+TONE: Clear, calm, encouraging. Beginner-friendly but technically accurate.
+GOAL: The output should feel like a guided knitting tutorial, not a compressed pattern.
+
+INSTRUCTION RULES:
+- One action per step. If a row has multiple distinct actions, split into separate steps.
+- Keep each instruction clear and complete. Split only when it improves understanding.
+- Use second-person imperative voice: "Knit 10 stitches." not "The knitter knits 10 stitches."
+- Each instruction must be a complete, grammatically correct sentence ending with a period.
+- Capitalize the first word of every instruction.
+- NEVER include HTML tags, angle brackets (< >), quotation marks around terms, or link-like artifacts (e.g. knit">pick up is WRONG — write "knit, pick up").
+- NEVER produce fragments like word">word or word'>word in instructions — these are formatting errors.
+- NEVER leave abbreviations unexpanded — always write the full word (k -> knit, p -> purl, yo -> yarn over, k2tog -> knit 2 together, ssk -> slip slip knit, CO -> cast on, BO -> bind off).
+- NEVER pass through raw pattern notation — translate everything into plain English.
+- NEVER start an instruction with a conjunction (And, But, Or).
+- Clearly explain repeats in plain language. BAD: "Row 3-10: rep" GOOD: "Repeat Rows 3 through 10 until the piece measures 15 cm."
+- Where relevant, include stitch count checkpoints in tips (e.g. "You should have 42 stitches on your needle.").
+- Add common-mistake warnings to tips where beginners often go wrong.
+
+GLOSSARY:
+- Put all knitting terms used in instructions into glossary with plain-English definitions.
+- For each glossary term include: beginner (one practical tip), whenToUse (why this matters), example (one short contextual example).
+
+SIZING:
+- Extract size-specific numbers into sizeValues; keep instruction text size-agnostic when possible.
+- If only one size exists, use key "OS".
+
+EXAMPLE — Input snippet:
+"CO 42 sts. Row 1 (RS): *K2, P2; rep from * to last 2 sts, K2. Row 2: *P2, K2; rep from * to last 2 sts, P2."
+
+EXAMPLE — Output steps (abbreviated):
+[{"id":1,"section":"Ribbing","instruction":"Cast on 42 stitches.","tip":"Use long-tail cast on for a stretchy edge.","type":"normal"},{"id":2,"section":"Ribbing","instruction":"Row 1 (right side): Knit 2, purl 2. Repeat this pattern across the row until 2 stitches remain, then knit 2.","tip":"You should have 42 stitches on your needle.","type":"normal"},{"id":3,"section":"Ribbing","instruction":"Row 2: Purl 2, knit 2. Repeat this pattern across the row until 2 stitches remain, then purl 2.","type":"normal"}]`;
+
+  // ─── DOM ───
+  const $ = id => document.getElementById(id);
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    var target = $('screen-' + name);
+    target.classList.add('active');
+    target.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 180, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }
+    );
+    if (name === 'home') renderHome();
+  }
+
+  // ─── HOME / LIBRARY ───
+  function renderHome() {
+    const lib = loadLibrary();
+    const list = $('home-list');
+    const empty = $('home-empty');
+
+    list.innerHTML = '';
+    if (lib.length === 0) {
+      empty.style.display = 'flex';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const sorted = lib.slice().sort(function(a, b) { return (b.lastOpenedAt || 0) - (a.lastOpenedAt || 0); });
+    sorted.forEach(function(item, i) {
+      const pct = item.totalSteps > 1
+        ? Math.round((item.currentStep / (item.totalSteps - 1)) * 100)
+        : 100;
+      const card = document.createElement('div');
+      card.className = 'home-card';
+      card.style.animationDelay = (80 + i * 50) + 'ms';
+      card.innerHTML =
+        '<div class="home-card-top">' +
+          '<div class="home-card-title">' + esc(item.title || 'Untitled') + '</div>' +
+          (item.sizeLabel ? '<div class="home-card-size">' + esc(item.sizeLabel) + '</div>' : '') +
+        '</div>' +
+        '<div class="home-card-progress-row">' +
+          '<div class="home-card-progress-track"><div class="home-card-progress-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="home-card-step">Step ' + (item.currentStep + 1) + ' of ' + item.totalSteps + '</div>' +
+        '</div>' +
+        '<div class="home-card-time">' + relativeTime(item.lastOpenedAt) + '</div>' +
+        '<button class="home-card-delete" data-id="' + item.id + '" title="Delete">&times;</button>';
+
+      card.addEventListener('click', function(e) {
+        if (e.target.closest('.home-card-delete')) return;
+        resumePattern(item.id);
+      });
+      list.appendChild(card);
+    });
+
+    list.querySelectorAll('.home-card-delete').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var id = btn.dataset.id;
+        if (!confirm('Delete this pattern?')) return;
+        deletePattern(id);
+      });
+    });
+  }
+
+  function deletePattern(id) {
+    var lib = loadLibrary().filter(function(p) { return p.id !== id; });
+    saveLibrary(lib);
+    deletePatternEntry(id);
+    renderHome();
+  }
+
+  function resumePattern(id) {
+    migrateLegacyNotes(id);
+    var entry = loadPatternEntry(id);
+    if (!entry || !entry.patternData) {
+      alert('Pattern data not found.');
+      deletePattern(id);
+      return;
+    }
+    activePatternId = id;
+    patternData = entry.patternData;
+    chosenSizeKey = entry.chosenSizeKey || 'OS';
+    idx = entry.currentStep || 0;
+    repeatProgress = entry.repeatProgress || {};
+    journeyNotes = entry.journeyNotes || '';
+    sectionColorMap = entry.sectionColorMap || {};
+
+    if (!Object.keys(sectionColorMap).length) {
+      var ci = 0;
+      (patternData.steps || []).forEach(function(s) {
+        if (!sectionColorMap[s.section]) {
+          sectionColorMap[s.section] = SECTION_COLORS[ci % SECTION_COLORS.length];
+          ci++;
+        }
+      });
+    }
+
+    normalizeGlossary();
+    startReader();
+    updateLibraryMeta(id, { lastOpenedAt: Date.now() });
+  }
+
+  $('home-new-btn').addEventListener('click', function() { showScreen('upload'); });
+
+  // ─── UPLOAD ───
+  const dropZone = $('drop-zone');
+  const fileInput = $('file-input');
+
+  $('upload-back').addEventListener('click', function() { showScreen('home'); });
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+  $('paste-toggle').addEventListener('click', () => {
+    const pa = $('paste-area');
+    pa.classList.toggle('visible');
+    const isOpen = pa.classList.contains('visible');
+    if (isOpen) {
+      // Focus after expand, but avoid smooth scrolling to prevent viewport jump.
+      setTimeout(() => {
+        const ta = $('paste-text');
+        try { ta.focus({ preventScroll: true }); }
+        catch (_) { ta.focus(); }
+      }, 220);
+    }
+  });
+  $('paste-submit').addEventListener('click', () => {
+    const text = $('paste-text').value.trim();
+    if (text) processPattern({ type: 'text', content: text });
+  });
+
+  function handleFile(file) {
+    if (file.size > MAX_FILE_SIZE) { showError('File too large. Try under 30 MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const b64 = reader.result.split(',')[1];
+      if (file.name.endsWith('.pdf')) {
+        processPattern({ type: 'pdf', data: b64, mediaType: 'application/pdf' });
+      } else if (/^image\/(png|jpeg|gif|webp)/.test(file.type)) {
+        processPattern({ type: 'image', data: b64, mediaType: file.type });
+      } else { showError('Unsupported file type.'); }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ─── API ───
+  async function processPattern(input) {
+    showScreen('processing');
+    $('processing-label').textContent = 'Reading your pattern';
+    $('processing-label').setAttribute('data-text', 'Reading your pattern');
+
+    let userContent = [];
+    if (input.type === 'text') {
+      userContent.push({ type: 'text', text: 'Parse this knitting pattern:\n\n' + input.content });
+    } else if (input.type === 'pdf') {
+      userContent.push({ type: 'document', source: { type: 'base64', media_type: input.mediaType, data: input.data } });
+      userContent.push({ type: 'text', text: 'Parse this knitting pattern.' });
+    } else if (input.type === 'image') {
+      userContent.push({ type: 'image', source: { type: 'base64', media_type: input.mediaType, data: input.data } });
+      userContent.push({ type: 'text', text: 'Parse this knitting pattern.' });
+    }
+
+    try {
+      startProcessingExperience();
+      const resp = await fetch(API_ORIGIN + '/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 20000,
+          stream: true,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: userContent }]
+        })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+
+      // Stream the response for faster perceived performance
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+      let buffer = '';
+      const processSseLine = (line) => {
+        if (!line.startsWith('data: ')) return;
+        const chunk = line.slice(6);
+        if (chunk === '[DONE]') return;
+        try {
+          const evt = JSON.parse(chunk);
+          if (evt.type === 'content_block_delta' && evt.delta?.text) {
+            fullText += evt.delta.text;
+          }
+        } catch {}
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) processSseLine(line);
+        if (done) break;
+      }
+      // Flush any trailing decoder/buffer content that may not end with newline.
+      buffer += decoder.decode();
+      buffer.split('\n').forEach(processSseLine);
+
+      if (!fullText) throw new Error('No text in response');
+
+      let raw = fullText.trim().replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      patternData = await safeParsePatternJson(raw);
+      normalizeGlossary();
+      if (!patternData.steps?.length) throw new Error('No steps found');
+
+      await polishInstructions(patternData.steps);
+
+      // Build section color map
+      sectionColorMap = {};
+      let ci = 0;
+      patternData.steps.forEach(s => {
+        if (!sectionColorMap[s.section]) {
+          sectionColorMap[s.section] = SECTION_COLORS[ci % SECTION_COLORS.length];
+          ci++;
+        }
+      });
+
+      idx = 0;
+      repeatProgress = {};
+      chosenSizeKey = null;
+      activePatternId = generateId();
+
+      if (patternData.sizes?.length > 1) {
+        stopProcessingExperience();
+        showSizePicker();
+      } else {
+        chosenSizeKey = patternData.sizes?.[0]?.key || 'OS';
+        persistNewPattern();
+        stopProcessingExperience();
+        startReader();
+      }
+    } catch (err) {
+      console.error(err);
+      stopProcessingExperience();
+      showError(err.message || 'Could not parse pattern.');
+    }
+  }
+
+  function showError(msg) {
+    $('error-message').textContent = msg;
+    showScreen('error');
+  }
+
+  $('error-back').addEventListener('click', goHome);
+  $('error-paste').addEventListener('click', () => {
+    showScreen('upload');
+    $('paste-area').classList.add('visible');
+    setTimeout(() => $('paste-text').focus(), 100);
+  });
+
+  function resetToUpload() {
+    immediatelySaveProgress();
+    patternData = null; chosenSizeKey = null; idx = 0; repeatProgress = {};
+    journeyNotes = '';
+    activePatternId = null;
+    fileInput.value = ''; $('paste-text').value = '';
+    $('journey-notes').value = '';
+    $('journey-notes').style.height = '320px';
+    $('paste-area').classList.remove('visible');
+    showScreen('upload');
+  }
+
+  function goHome() {
+    immediatelySaveProgress();
+    patternData = null; chosenSizeKey = null; idx = 0; repeatProgress = {};
+    journeyNotes = '';
+    activePatternId = null;
+    fileInput.value = ''; $('paste-text').value = '';
+    $('journey-notes').value = '';
+    $('journey-notes').style.height = '320px';
+    $('paste-area').classList.remove('visible');
+    showScreen('home');
+  }
+
+  // ─── SIZE PICKER ───
+  function showSizePicker() {
+    $('sp-title').textContent = patternData.title || 'Choose size';
+    $('sp-sub').textContent = patternData.description || '';
+    const container = $('sp-cards');
+    container.innerHTML = '';
+    patternData.sizes.forEach((size, i) => {
+      const card = document.createElement('div');
+      card.className = 'sp-card';
+      card.style.animationDelay = (200 + i * 50) + 'ms';
+      card.innerHTML =
+        `<div class="sp-card-size">${esc(size.label)}</div>` +
+        `<div class="sp-card-label">${esc(size.label)}</div>` +
+        (size.details ? `<div class="sp-card-range">${esc(size.details)}</div>` : '');
+      card.addEventListener('click', () => { chosenSizeKey = size.key; persistNewPattern(); startReader(); });
+      container.appendChild(card);
+    });
+    showScreen('size');
+  }
+
+  function persistNewPattern() {
+    if (!activePatternId || !patternData) return;
+    const totalSteps = expandDenseSteps(patternData.steps || []).length;
+    const sizeObj = patternData.sizes?.find(function(s) { return s.key === chosenSizeKey; });
+    var lib = loadLibrary();
+    if (!lib.find(function(p) { return p.id === activePatternId; })) {
+      lib.push({
+        id: activePatternId,
+        title: patternData.title || 'Untitled',
+        sizeLabel: sizeObj ? sizeObj.label : '',
+        currentStep: 0,
+        totalSteps: totalSteps,
+        createdAt: Date.now(),
+        lastOpenedAt: Date.now()
+      });
+      saveLibrary(lib);
+    }
+    savePatternEntry(activePatternId, {
+      patternData: patternData,
+      chosenSizeKey: chosenSizeKey,
+      currentStep: 0,
+      repeatProgress: {},
+      journeyNotes: '',
+      sectionColorMap: sectionColorMap
+    });
+    migrateLegacyNotes(activePatternId);
+  }
+
+  // ─── READER ───
+  function startReader() {
+    steps = expandDenseSteps(patternData.steps || []);
+    if (idx >= steps.length) idx = steps.length - 1;
+    if (idx < 0) idx = 0;
+    loadJourneyNotes();
+    syncJourneyNotesField();
+    $('topbar-pattern').textContent = patternData.title || 'Pattern';
+    const sizeObj = patternData.sizes?.find(s => s.key === chosenSizeKey);
+    $('size-chip').textContent = sizeObj ? 'SIZE ' + sizeObj.key : '';
+    $('size-chip').style.display = (patternData.sizes?.length > 1) ? '' : 'none';
+    if (activePatternId) {
+      updateLibraryMeta(activePatternId, { totalSteps: steps.length });
+    }
+    showScreen('step');
+    render();
+  }
+
+  function render() {
+    const step = steps[idx];
+    const total = steps.length;
+
+    $('progress-fill').style.width = ((idx / (total - 1)) * 100) + '%';
+    $('topbar-pos').textContent = 'Step ' + (idx + 1) + ' of ' + total;
+    $('section-label').textContent = step.section;
+
+    // Build instruction with size resolution and glossary terms
+    let instruction = sanitizeInstructionText(step.instruction || '');
+    if (step.sizeValues && chosenSizeKey && step.sizeValues[chosenSizeKey]) {
+      const val = step.sizeValues[chosenSizeKey];
+      if (!instruction.includes(val)) instruction += ' (' + val + ')';
+    }
+
+    let instrHtml = esc(instruction);
+    const matches = findGlossaryMatches(instruction, step);
+    matches.forEach(match => {
+      const escapedPhrase = esc(match.phrase);
+      const re = new RegExp('(?<![\\w-])' + escRe(escapedPhrase) + '(?![\\w-])', 'gi');
+      instrHtml = instrHtml.replace(re, m =>
+        '<span class="term" data-term="' + esc(match.key) + '">' + m + '</span>'
+      );
+    });
+    // Make URLs clickable (supports https:// and www.)
+    instrHtml = instrHtml.replace(
+      /(?<![="'>])((?:https?:\/\/|www\.)[^\s<)]+)/gi,
+      (m) => {
+        const href = /^https?:\/\//i.test(m) ? m : ('https://' + m);
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="step-link">${m}</a>`;
+      }
+    );
+    $('step-instruction').innerHTML = instrHtml;
+
+    // Attach glossary listeners
+    document.querySelectorAll('.term').forEach(el => {
+      el.addEventListener('click', (e) => openGlossary(el.dataset.term, e));
+    });
+
+    // Tip
+    const tipEl = $('step-tip');
+    if (step.tip) { tipEl.textContent = step.tip; tipEl.style.display = 'block'; }
+    else { tipEl.style.display = 'none'; }
+
+    // Repeat block
+    const rb = $('repeat-block');
+    const isRep = step.type === 'repeat' && step.repeatTotal;
+    rb.classList.toggle('visible', !!isRep);
+    if (isRep) renderRepeat(step);
+
+    // Nav
+    $('nav-prev').disabled = (idx === 0);
+    updateNextBtn(step);
+    syncJourneyNotesField();
+  }
+
+  function renderRepeat(step) {
+    const done = repeatProgress[idx] || 0;
+    const total = step.repeatTotal;
+
+    $('repeat-label').textContent = (step.repeatLabel || 'Repeat') + ' \u2014 ' + done + ' of ' + total + ' done';
+
+    const pips = $('repeat-pips');
+    pips.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const p = document.createElement('div');
+      p.className = 'pip' + (i < done ? ' done' : '');
+      pips.appendChild(p);
+    }
+
+    const btn = $('repeat-mark-btn');
+    if (done >= total) {
+      btn.textContent = 'All rounds complete \u2713';
+      btn.disabled = true;
+    } else {
+      btn.textContent = 'Mark round ' + (done + 1) + ' done';
+      btn.disabled = false;
+    }
+  }
+
+  function updateNextBtn(step) {
+    const nextBtn = $('nav-next');
+    const isRep = step.type === 'repeat' && step.repeatTotal;
+    if (isRep) {
+      const done = (repeatProgress[idx] || 0) >= step.repeatTotal;
+      nextBtn.disabled = !done;
+      nextBtn.textContent = done ? 'Next Step' : 'Complete all ' + step.repeatTotal + ' rounds first';
+      nextBtn.style.fontSize = done ? '17px' : '13px';
+    } else {
+      nextBtn.disabled = false;
+      nextBtn.textContent = idx === steps.length - 1 ? 'Finish Pattern' : 'Next Step';
+      nextBtn.style.fontSize = '17px';
+    }
+  }
+
+  $('repeat-mark-btn').addEventListener('click', () => {
+    const step = steps[idx];
+    const cur = repeatProgress[idx] || 0;
+    if (cur >= step.repeatTotal) return;
+    repeatProgress[idx] = cur + 1;
+    renderRepeat(step);
+    updateNextBtn(step);
+    debouncedSaveProgress();
+
+    const pips = document.querySelectorAll('.pip');
+    const newPip = pips[cur];
+    if (newPip) {
+      newPip.animate(
+        [{ transform: 'scaleY(1.8)' }, { transform: 'scaleY(1)' }],
+        { duration: 200, easing: 'cubic-bezier(0.23,1,0.32,1)' }
+      );
+    }
+  });
+
+  function navigate(dir) {
+    const nextIdx = idx + dir;
+    if (nextIdx < 0) return;
+    if (nextIdx >= steps.length) { showDone(); return; }
+
+    const card = $('step-card');
+    const exitX = dir > 0 ? '-28px' : '28px';
+    const enterX = dir > 0 ? '28px' : '-28px';
+
+    card.animate(
+      [{ opacity: 1, transform: 'translateX(0)' },
+       { opacity: 0, transform: 'translateX(' + exitX + ')' }],
+      { duration: 140, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }
+    ).onfinish = () => {
+      idx = nextIdx;
+      render();
+      debouncedSaveProgress();
+      card.animate(
+        [{ opacity: 0, transform: 'translateX(' + enterX + ')' },
+         { opacity: 1, transform: 'translateX(0)' }],
+        { duration: 240, easing: 'cubic-bezier(0.32,0.72,0,1)', fill: 'forwards' }
+      );
+    };
+  }
+
+  $('nav-prev').addEventListener('click', () => navigate(-1));
+  $('nav-next').addEventListener('click', () => {
+    const step = steps[idx];
+    if (step.type === 'repeat' && step.repeatTotal) {
+      if ((repeatProgress[idx] || 0) < step.repeatTotal) return;
+    }
+    navigate(1);
+  });
+
+  // Back button: navigate back through steps, then return to upload
+  // (topbar-back was removed; we use nav-prev for back, and add a long-press on topbar-pattern to go home)
+  $('topbar-pattern').addEventListener('dblclick', () => {
+    if (confirm('Return to library?')) goHome();
+  });
+
+  // ─── GLOSSARY ───
+  function openGlossary(key, event) {
+    const normalizedKey = normalizeTermKey(key);
+    const entry = patternData.glossary?.[normalizedKey];
+    if (!entry) return;
+
+    $('gl-term').textContent = normalizedKey;
+    $('gl-def').textContent = entry.def || '';
+    $('gl-context').textContent = entry.whenToUse ? 'Why this matters now: ' + entry.whenToUse : '';
+    $('gl-beginner').textContent = entry.beginner ? 'Beginner tip: ' + entry.beginner : '';
+    $('gl-example').textContent = entry.example ? 'Example: ' + entry.example : '';
+    $('gl-context').style.display = entry.whenToUse ? 'block' : 'none';
+    $('gl-beginner').style.display = entry.beginner ? 'block' : 'none';
+    $('gl-example').style.display = entry.example ? 'block' : 'none';
+
+    const popover = $('gl-popover');
+    const arrow = $('gl-arrow');
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    const popoverW = Math.min(viewW - 32, 360);
+
+    if (event && event.target) {
+      const rect = event.target.getBoundingClientRect();
+      const termCenterX = rect.left + rect.width / 2;
+      const termBottom = rect.bottom;
+      const termTop = rect.top;
+
+      let popLeft = termCenterX - popoverW / 2;
+      popLeft = Math.max(16, Math.min(popLeft, viewW - popoverW - 16));
+      popover.style.left = popLeft + 'px';
+      popover.style.width = popoverW + 'px';
+
+      const arrowLeft = Math.max(20, Math.min(termCenterX - popLeft - 12, popoverW - 44));
+      arrow.style.left = arrowLeft + 'px';
+
+      const gap = 10;
+      const safeMargin = 16;
+
+      popover.style.overflow = 'visible';
+      popover.style.maxHeight = 'none';
+      popover.style.top = '0'; popover.style.bottom = 'auto';
+      void popover.offsetHeight;
+      const contentH = popover.scrollHeight;
+      popover.style.overflow = '';
+
+      const spaceBelow = viewH - termBottom - gap - safeMargin;
+      const spaceAbove = termTop - gap - safeMargin;
+      const placeAbove = contentH > spaceBelow && spaceAbove > spaceBelow;
+
+      if (placeAbove) {
+        popover.style.top = 'auto';
+        popover.style.bottom = (viewH - termTop + gap) + 'px';
+        popover.style.maxHeight = spaceAbove + 'px';
+        arrow.style.top = 'auto';
+        arrow.style.bottom = '-12px';
+        arrow.querySelector('svg').style.transform = 'rotate(180deg)';
+        popover.style.transformOrigin = (arrowLeft + 12) + 'px 100%';
+      } else {
+        popover.style.top = (termBottom + gap) + 'px';
+        popover.style.bottom = 'auto';
+        popover.style.maxHeight = spaceBelow + 'px';
+        arrow.style.top = '-12px';
+        arrow.style.bottom = 'auto';
+        arrow.querySelector('svg').style.transform = 'none';
+        popover.style.transformOrigin = (arrowLeft + 12) + 'px 0px';
+      }
+    }
+
+    $('gl-backdrop').classList.add('open');
+  }
+
+  function closeGlossary(e) {
+    if (e && e.target !== $('gl-backdrop') && !e.target.closest('.gl-close-btn')) return;
+    $('gl-backdrop').classList.remove('open');
+    setTimeout(() => {
+      const popover = $('gl-popover');
+      popover.style.top = ''; popover.style.bottom = '';
+    }, 190);
+  }
+
+  $('gl-backdrop').addEventListener('click', closeGlossary);
+  $('gl-close').addEventListener('click', function() {
+    $('gl-backdrop').classList.remove('open');
+    setTimeout(() => {
+      $('gl-popover').style.top = ''; $('gl-popover').style.bottom = '';
+    }, 190);
+  });
+
+  // ─── NOTES PAGE ───
+  function openNotesPage() {
+    syncJourneyNotesField();
+    showScreen('notes');
+    setTimeout(() => $('journey-notes').focus(), 160);
+  }
+
+  function closeNotesPage() {
+    $('journey-notes').blur();
+    saveJourneyNotes();
+    debouncedSaveProgress();
+    showScreen('step');
+  }
+
+  $('nav-notes').addEventListener('click', openNotesPage);
+  $('notes-page-close').addEventListener('click', closeNotesPage);
+
+
+  // ─── DONE ───
+  function showDone() {
+    immediatelySaveProgress();
+    $('done-name').textContent = patternData.title || 'Your pattern';
+    const sizeObj = patternData.sizes?.find(s => s.key === chosenSizeKey);
+    $('done-meta').textContent = (sizeObj ? 'SIZE ' + sizeObj.key + ' \u00b7 ' : '') + steps.length + ' STEPS';
+    showScreen('done');
+
+    const els = document.querySelectorAll('#screen-done .done-word, #screen-done .done-name, #screen-done .done-meta, #screen-done .done-restart');
+    els.forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(8px)';
+      el.animate(
+        [{ opacity: 0, transform: 'translateY(8px)' },
+         { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 280, delay: i * 60, easing: 'cubic-bezier(0.32,0.72,0,1)', fill: 'forwards' }
+      );
+    });
+  }
+
+  $('done-restart').addEventListener('click', goHome);
+
+  // ─── NOTES ───
+  function loadJourneyNotes() {
+    if (activePatternId) {
+      var entry = loadPatternEntry(activePatternId);
+      journeyNotes = (entry && entry.journeyNotes) || '';
+    } else {
+      journeyNotes = '';
+    }
+  }
+
+  function saveJourneyNotes() {
+    if (!activePatternId) return;
+    var entry = loadPatternEntry(activePatternId);
+    if (!entry) return;
+    entry.journeyNotes = journeyNotes;
+    savePatternEntry(activePatternId, entry);
+  }
+
+  function autoGrowNotes() {
+    const el = $('journey-notes');
+    el.style.height = '320px';
+    el.style.height = Math.max(320, el.scrollHeight) + 'px';
+  }
+
+  function syncJourneyNotesField() {
+    const el = $('journey-notes');
+    if (document.activeElement !== el && el.value !== journeyNotes) {
+      el.value = journeyNotes;
+      autoGrowNotes();
+    }
+  }
+
+  $('journey-notes').addEventListener('input', () => {
+    journeyNotes = $('journey-notes').value;
+    autoGrowNotes();
+    saveJourneyNotes();
+  });
+
+  // ─── Helpers ───
+  function esc(s) {
+    if (!s) return '';
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  
+  function normalizeTermKey(s) {
+    return (s || '').trim().toLowerCase();
+  }
+
+  function sanitizeInstructionText(text) {
+    if (!text) return '';
+    return String(text)
+      // Model artifact: word">word or word">word (glossary link leakage)
+      .replace(/[""''\u201C\u201D\u2018\u2019]?\s*>\s*(?=[a-zA-Z])/g, ' ')
+      // Strip full HTML-like tags
+      .replace(/<[^>]*>/g, ' ')
+      // Any remaining lone angle brackets
+      .replace(/[<>]/g, ' ')
+      // Normalize smart quotes to ASCII
+      .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'")
+      // Repeated punctuation
+      .replace(/([.,;:!?])\1+/g, '$1')
+      // Leading conjunctions
+      .replace(/^\s*(And|But|Or)\s+/i, '')
+      // Collapse whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+      // Capitalize first letter
+      .replace(/^([a-z])/, function(m) { return m.toUpperCase(); })
+      // Ensure terminal punctuation
+      .replace(/([^.!?])\s*$/, '$1.');
+  }
+
+  function splitDenseInstruction(instruction) {
+    const cleaned = sanitizeInstructionText(instruction);
+    if (!cleaned) return [];
+    if (cleaned.length < 250) return [cleaned];
+
+    const coarse = cleaned
+      .replace(/\bThen,\s*/gi, '||Then, ')
+      .replace(/\bNext,\s*/gi, '||Next, ')
+      .replace(/\bAfter that,\s*/gi, '||After that, ')
+      .replace(/\bFinally,\s*/gi, '||Finally, ')
+      .split('||')
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    if (coarse.length > 1) return coarse;
+
+    const bySentence = cleaned
+      .split(/(?<=[.!?])\s+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+    return bySentence.length > 1 ? bySentence : [cleaned];
+  }
+
+  function expandDenseSteps(inputSteps) {
+    const expanded = [];
+    let nextId = 1;
+    inputSteps.forEach(step => {
+      const baseInstruction = sanitizeInstructionText(step.instruction || '');
+      if (step.type && step.type !== 'normal') {
+        expanded.push({ ...step, id: nextId++, instruction: baseInstruction });
+        return;
+      }
+      const parts = splitDenseInstruction(baseInstruction);
+      if (parts.length <= 1) {
+        expanded.push({ ...step, id: nextId++, instruction: parts[0] || baseInstruction });
+        return;
+      }
+      parts.forEach((part, i) => {
+        expanded.push({
+          ...step,
+          id: nextId++,
+          label: step.label ? `${step.label} - Part ${i + 1}` : `Part ${i + 1}`,
+          instruction: part
+        });
+      });
+    });
+    return expanded;
+  }
+
+  function normalizeGlossary() {
+    if (!patternData?.glossary) return;
+    const raw = patternData.glossary;
+    const normalized = {};
+    Object.keys(raw).forEach(key => {
+      const entry = raw[key] || {};
+      const nk = normalizeTermKey(key);
+      normalized[nk] = {
+        abbr: entry.abbr || null,
+        full: entry.full || null,
+        def: entry.def || '',
+        beginner: entry.beginner || null,
+        whenToUse: entry.whenToUse || null,
+        example: entry.example || null
+      };
+    });
+    patternData.glossary = normalized;
+    if (patternData.steps?.length) {
+      patternData.steps.forEach(step => {
+        if (step.terms?.length) step.terms = step.terms.map(normalizeTermKey);
+      });
+    }
+  }
+
+  function findGlossaryMatches(instruction, step) {
+    if (!patternData?.glossary || !instruction) return [];
+    const gl = patternData.glossary;
+    const lowerInstruction = instruction.toLowerCase();
+    const candidates = new Map();
+    const fromStep = step.terms || [];
+
+    fromStep.forEach(t => {
+      const key = normalizeTermKey(t);
+      const entry = gl[key];
+      if (!entry) return;
+      candidates.set(key + '::' + key, { key, phrase: key });
+      if (entry.abbr) candidates.set(key + '::' + entry.abbr, { key, phrase: entry.abbr });
+      if (entry.full) candidates.set(key + '::' + entry.full, { key, phrase: entry.full });
+    });
+
+    Object.keys(gl).forEach(key => {
+      const entry = gl[key];
+      if (lowerInstruction.includes(key)) candidates.set(key + '::' + key, { key, phrase: key });
+      if (entry.abbr && lowerInstruction.includes(entry.abbr.toLowerCase())) {
+        candidates.set(key + '::' + entry.abbr, { key, phrase: entry.abbr });
+      }
+      if (entry.full && lowerInstruction.includes(entry.full.toLowerCase())) {
+        candidates.set(key + '::' + entry.full, { key, phrase: entry.full });
+      }
+    });
+
+    return [...candidates.values()].sort((a, b) => b.phrase.length - a.phrase.length);
+  }
+
+  let processingProgressTimer = null;
+  let processingMessageTimer = null;
+  let processingTypingTimer = null;
+  let processingProgress = 0;
+  let processingLineIndex = 0;
+
+  const PROCESSING_LINES = [
+    'Mapping your pattern into clear steps.',
+    'Translating shorthand into plain knitting language.',
+    'Checking repeats, counts, and row flow.',
+    'Building beginner-friendly term explanations.',
+    'Organizing size-specific details so nothing is missed.',
+    'Preparing a calm, one-step-at-a-time reading experience.',
+    'Finding hidden assumptions and making them explicit.',
+    'Aligning stitch counts with your selected size.',
+    'Converting compact notation into human instructions.',
+    'Separating setup actions from repeat actions.',
+    'Keeping the knitting intent while simplifying phrasing.',
+    'Cross-checking section boundaries and row order.',
+    'Making terms tappable with useful context.',
+    'Extracting where to turn, join, and continue.',
+    'Rewriting dense rows into easier reading chunks.',
+    'Validating that each step is actionable.',
+    'Smoothing transitions between rows and sections.',
+    'Highlighting the details beginners usually miss.',
+    'Preserving accuracy while reducing pattern friction.',
+    'Almost ready - assembling your guided flow.'
+  ];
+
+  function startProcessingExperience() {
+    stopProcessingExperience();
+    processingProgress = 3;
+    $('processing-bar-fill').style.width = processingProgress + '%';
+
+    processingProgressTimer = setInterval(() => {
+      if (processingProgress >= 92) return;
+      const drift = processingProgress < 45 ? 1.1 : (processingProgress < 75 ? 0.6 : 0.3);
+      processingProgress = Math.min(92, processingProgress + drift);
+      $('processing-bar-fill').style.width = processingProgress.toFixed(1) + '%';
+    }, 220);
+
+    processingLineIndex = Math.floor(Math.random() * PROCESSING_LINES.length);
+    setProcessingLine(PROCESSING_LINES[processingLineIndex], true);
+    scheduleNextProcessingLine();
+  }
+
+  function scheduleNextProcessingLine() {
+    const current = PROCESSING_LINES[processingLineIndex] || '';
+    // Hold each line long enough to read comfortably.
+    const holdMs = Math.min(6200, Math.max(3200, 1200 + current.length * 42));
+    processingMessageTimer = setTimeout(() => {
+      processingLineIndex = (processingLineIndex + 1) % PROCESSING_LINES.length;
+      setProcessingLine(PROCESSING_LINES[processingLineIndex], false);
+      scheduleNextProcessingLine();
+    }, holdMs);
+  }
+
+  function setProcessingLine(line, immediate) {
+    const label = $('processing-label');
+    if (processingTypingTimer) clearTimeout(processingTypingTimer);
+    if (immediate) {
+      label.textContent = line;
+      label.setAttribute('data-text', line);
+      label.style.opacity = '1';
+      return;
+    }
+    label.style.opacity = '0';
+    processingTypingTimer = setTimeout(() => {
+      label.textContent = line;
+      label.setAttribute('data-text', line);
+      label.style.opacity = '1';
+      processingTypingTimer = null;
+    }, 340);
+  }
+
+  function stopProcessingExperience() {
+    if (processingProgressTimer) clearInterval(processingProgressTimer);
+    if (processingMessageTimer) clearTimeout(processingMessageTimer);
+    if (processingTypingTimer) clearTimeout(processingTypingTimer);
+    processingProgressTimer = null;
+    processingMessageTimer = null;
+    processingTypingTimer = null;
+    processingProgress = 100;
+    $('processing-bar-fill').style.width = '100%';
+    $('processing-label').style.opacity = '1';
+  }
+
+  // Upgrade parser result via fallback repair call when needed.
+  async function polishInstructions(steps) {
+    if (!steps || !steps.length) return;
+    try {
+      var instructions = steps.map(function(s) { return s.instruction || ''; });
+      var polishPrompt = 'You are a knitting instruction editor. Your tone is clear, calm, and encouraging.\n' +
+        'Clean up these instructions:\n' +
+        '- Fix punctuation, capitalization, and grammar.\n' +
+        '- Remove stray characters (>, <, angle brackets, quotation artifacts).\n' +
+        '- Expand any remaining abbreviations into full words.\n' +
+        '- Keep meaning identical — do not add or remove information.\n' +
+        '- Use second-person imperative voice ("Knit 10 stitches." not "You should knit 10.").\n' +
+        '- Each instruction should read like one step in a guided knitting tutorial.\n' +
+        '- Do not invent new information. Only polish what is there.\n' +
+        'Return ONLY a JSON array of the cleaned strings in the same order. No preamble.';
+
+      var resp = await fetch(API_ORIGIN + '/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 16000,
+          stream: false,
+          messages: [{ role: 'user', content: [{ type: 'text', text: polishPrompt + '\n\n' + JSON.stringify(instructions) }] }]
+        })
+      });
+
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var txt = (data?.content?.map(function(c) { return c?.text || ''; }).join('') || '').trim();
+      if (!txt) return;
+      txt = txt.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+      var polished = JSON.parse(txt);
+      if (!Array.isArray(polished) || polished.length !== steps.length) return;
+      for (var i = 0; i < steps.length; i++) {
+        if (typeof polished[i] === 'string' && polished[i].trim()) {
+          steps[i].instruction = polished[i].trim();
+        }
+      }
+    } catch (e) {
+      console.warn('Polish pass skipped:', e.message);
+    }
+  }
+
+  async function safeParsePatternJson(raw) {
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      const candidate = extractLikelyJson(raw);
+      if (candidate) {
+        try { return JSON.parse(candidate); } catch (_) {}
+      }
+      const repaired = await repairPatternJson(candidate || raw);
+      try {
+        return JSON.parse(repaired);
+      } catch (_) {
+        const repairedCandidate = extractLikelyJson(repaired);
+        if (!repairedCandidate) throw new Error('Could not parse pattern JSON.');
+        return JSON.parse(repairedCandidate);
+      }
+    }
+  }
+
+  function extractLikelyJson(text) {
+    if (!text) return '';
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) return '';
+    return text.slice(start, end + 1).trim();
+  }
+
+  async function repairPatternJson(badJson) {
+    const repairPrompt = `Fix this malformed JSON and return ONLY valid JSON.
+Keep exactly the same schema and meaning. Do not add explanations.
+Malformed JSON:
+${badJson}`;
+
+    const resp = await fetch(API_ORIGIN + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 20000,
+        stream: false,
+        messages: [{ role: 'user', content: [{ type: 'text', text: repairPrompt }] }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    const data = await resp.json();
+    const txt = data?.content?.map(c => c?.text || '').join('').trim() || '';
+    if (!txt) throw new Error('Could not repair model JSON');
+    return txt.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+  }
+
+  // ─── KEYBOARD HEIGHT (Capacitor plugin) ───
+  if (window.Capacitor?.Plugins?.Keyboard) {
+    const { Keyboard } = Capacitor.Plugins;
+    Keyboard.addListener('keyboardWillShow', function(info) {
+      document.documentElement.style.setProperty('--kb-height', info.keyboardHeight + 'px');
+    });
+    Keyboard.addListener('keyboardWillHide', function() {
+      document.documentElement.style.setProperty('--kb-height', '0px');
+    });
+  }
+
+  // ─── SYSTEM THEME (status bar + meta tag) ───
+  function syncThemeColor() {
+    var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var bg = isDark ? '#1a1a1a' : '#f7f7f4';
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', bg);
+    if (window.Capacitor?.Plugins?.StatusBar) {
+      var StatusBar = Capacitor.Plugins.StatusBar;
+      StatusBar.setBackgroundColor({ color: bg }).catch(function() {});
+      StatusBar.setStyle({ style: isDark ? 'DARK' : 'LIGHT' }).catch(function() {});
+    }
+  }
+  syncThemeColor();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncThemeColor);
+
+  // ─── INIT ───
+  renderHome();
+
+})();
+</script>
+</body>
+</html>

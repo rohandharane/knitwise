@@ -1,0 +1,26 @@
+# Dependencies & tooling
+node_modules/
+.vercel/
+
+# Local agent / IDE caches (not app source)
+.adal/
+.agents/
+.claude/
+.cursor/
+
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Android / Gradle build outputs (may contain stale generated assets)
+android/**/build/
+android/.gradle/
+*.apk
+*.aab
