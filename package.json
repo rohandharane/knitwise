@@ -11,8 +11,8 @@
     "cap:run": "npx cap run android",
     "android": "npx cap sync android && npx cap open android"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["knitting", "patterns", "capacitor", "knitwise"],
+  "author": "Rohan Dharane (https://rohandharane.com)",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

@@ -1,25 +1,42 @@
-# Dependencies & tooling
+# ─── Dependencies & package managers ───
 node_modules/
+.pnp
+.pnp.js
+
+# ─── Vercel ───
 .vercel/
 
-# Local agent / IDE caches (not app source)
+# ─── Secrets (never commit) ───
+.env
+.env.local
+.env.*.local
+*.pem
+*.jks
+*.keystore
+
+# ─── Local agent / IDE (not app source) ───
 .adal/
 .agents/
 .claude/
 .cursor/
 
-# Secrets — never commit
-.env
-.env.local
-.env.*.local
-*.pem
-
-# OS / editor
+# ─── OS ───
 .DS_Store
 Thumbs.db
-*.log
+Desktop.ini
 
-# Android / Gradle build outputs (may contain stale generated assets)
+# ─── Logs & caches ───
+*.log
+npm-debug.log*
+.cache/
+
+# ─── Editors (optional local settings) ───
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Android / Gradle (see also android/.gitignore) ───
 android/**/build/
 android/.gradle/
 *.apk
