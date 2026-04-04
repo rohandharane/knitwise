@@ -762,6 +762,122 @@ button {
   padding: 5px 14px;
   border-radius: 100px;
   background: var(--muted-fill);
+  cursor: pointer;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--ease-out), background 160ms var(--ease-out);
+}
+.section-badge:active {
+  transform: scale(0.95);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .section-badge:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+}
+/* Chevron indicator for mobile */
+.section-badge::after {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-right: 1.5px solid var(--text-3);
+  border-bottom: 1.5px solid var(--text-3);
+  transform: rotate(45deg);
+  margin-left: 6px;
+  margin-top: -1px;
+}
+@media (min-width: 1024px) {
+  .section-badge::after { display: none; }
+}
+
+/* ─── SECTION PICKER (mobile sheet) ─── */
+.section-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+  transition: background 250ms var(--ease-out);
+}
+.section-picker-overlay.open {
+  pointer-events: auto;
+  background: rgba(0,0,0,0.35);
+}
+.section-picker-sheet {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--glass-bg-heavy);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  backdrop-filter: blur(40px) saturate(1.4);
+  border-radius: 16px 16px 0 0;
+  padding: 8px 20px calc(20px + var(--safe-bottom));
+  max-height: 65vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform 330ms var(--ease-drawer);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.1);
+}
+.section-picker-overlay.open .section-picker-sheet {
+  transform: translateY(0);
+}
+.section-picker-grabber {
+  width: 36px; height: 4px;
+  background: var(--grabber);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+.section-picker-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 550;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.section-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sp-section-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 420;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 14px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--ease-out), background 120ms ease;
+}
+.sp-section-btn:active {
+  transform: scale(0.97);
+  background: var(--muted-fill);
+}
+.sp-section-btn.current {
+  color: var(--accent);
+  font-weight: 550;
+}
+.sp-section-btn .sp-meta {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  font-weight: 400;
+}
+.sp-section-btn.current .sp-meta {
+  color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+@media (min-width: 1024px) {
+  .section-picker-overlay { display: none; }
 }
 .step-counter-group {
   display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
@@ -1215,12 +1331,16 @@ button {
     text-align: left;
     cursor: pointer;
     border-radius: 0 6px 6px 0;
-    transition: color 160ms var(--ease-out), background 160ms var(--ease-out), border-color 160ms var(--ease-out);
+    transition: color 160ms var(--ease-out), background 160ms var(--ease-out), border-color 200ms var(--ease-out);
     white-space: nowrap;
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.4;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .section-sidebar .sb-item:active {
+    transform: scale(0.97);
   }
   .section-sidebar .sb-item:hover {
     color: var(--text);
@@ -1377,7 +1497,7 @@ button {
     <div class="topbar-size-chip" id="size-chip"></div>
   </div>
   <div class="step-meta-row">
-    <div class="section-badge" id="section-label"></div>
+    <button class="section-badge" id="section-label" aria-haspopup="true"></button>
     <div class="step-counter-group">
       <div class="step-counter" id="topbar-pos"></div>
       <div class="progress-track">
@@ -1402,6 +1522,14 @@ button {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
     </button>
     <button class="btn-glass btn-glass-amber nav-next" id="nav-next">Next Step</button>
+  </div>
+  <!-- Section picker overlay (mobile) -->
+  <div class="section-picker-overlay" id="section-picker-overlay">
+    <div class="section-picker-sheet" id="section-picker-sheet">
+      <div class="section-picker-grabber"></div>
+      <div class="section-picker-title">Sections</div>
+      <div class="section-picker-list" id="section-picker-list"></div>
+    </div>
   </div>
 </div>
 
@@ -1451,6 +1579,19 @@ button {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script type="module">
+import {
+  sanitizeInstructionText as _modSanitize,
+  filterAndValidateSteps as _modFilterSteps,
+  rawInstructionNeedsRepair as _modNeedsRepair,
+  normalizeInputForParsing as _modNormalizeInput
+} from '/lib/pattern-parse.mjs';
+window.__kw_sanitize = _modSanitize;
+window.__kw_filterSteps = _modFilterSteps;
+window.__kw_needsRepair = _modNeedsRepair;
+window.__kw_normalizeInput = _modNormalizeInput;
+window.dispatchEvent(new Event('kw-module-ready'));
+</script>
 <script>
 (function() {
   'use strict';
@@ -1920,6 +2061,15 @@ EXAMPLE — Output steps (abbreviated):
 
       await polishInstructions(patternData.steps);
 
+      // Run module-based validation + sanitization pipeline if available
+      if (window.__kw_filterSteps) {
+        var quality = window.__kw_filterSteps(patternData.steps);
+        patternData.steps = quality.steps;
+        if (!patternData.steps.length) {
+          throw new Error('No usable steps after validation. Try pasting plain text.');
+        }
+      }
+
       // Build section color map
       sectionColorMap = {};
       let ci = 0;
@@ -2092,6 +2242,60 @@ EXAMPLE — Output steps (abbreviated):
       btn.classList.toggle('active', btn.getAttribute('data-section') === current);
     });
   }
+
+  // ─── MOBILE SECTION PICKER ───
+  function getSectionList() {
+    if (!steps || !steps.length) return [];
+    var sections = [];
+    var seen = {};
+    steps.forEach(function(s, i) {
+      var sec = s.section || 'Pattern';
+      if (!(sec in seen)) {
+        seen[sec] = { name: sec, firstIdx: i, count: 0 };
+        sections.push(seen[sec]);
+      }
+      seen[sec].count++;
+    });
+    return sections;
+  }
+
+  function openSectionPicker() {
+    var overlay = $('section-picker-overlay');
+    var list = $('section-picker-list');
+    if (!overlay || !list) return;
+    list.innerHTML = '';
+    var currentSection = steps[idx] ? steps[idx].section : '';
+    var sections = getSectionList();
+    sections.forEach(function(sec) {
+      var btn = document.createElement('button');
+      btn.className = 'sp-section-btn' + (sec.name === currentSection ? ' current' : '');
+      btn.innerHTML = '<span>' + esc(sec.name) + '</span><span class="sp-meta">' + sec.count + ' steps</span>';
+      btn.addEventListener('click', function() {
+        idx = sec.firstIdx;
+        render();
+        debouncedSaveProgress();
+        closeSectionPicker();
+      });
+      list.appendChild(btn);
+    });
+    overlay.classList.add('open');
+  }
+
+  function closeSectionPicker() {
+    var overlay = $('section-picker-overlay');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  // Tap section badge → open picker (mobile only, desktop uses sidebar)
+  $('section-label').addEventListener('click', function() {
+    if (window.innerWidth >= 1024) return; // desktop uses sidebar
+    openSectionPicker();
+  });
+
+  // Close on overlay tap
+  $('section-picker-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSectionPicker();
+  });
 
   function render() {
     const step = steps[idx];
@@ -2519,44 +2723,29 @@ EXAMPLE — Output steps (abbreviated):
   }
 
   function sanitizeInstructionText(text) {
+    // Use the robust module sanitizer (DOM-based, deduplication, validation)
+    if (window.__kw_sanitize) return window.__kw_sanitize(text);
+    // Fallback: basic cleanup if module hasn't loaded yet
     if (!text) return '';
     var s = String(text);
-
-    // ── PDF hyperlink artifact cleanup ──
-    // Web-to-PDF files produce chains like: word">word">word
-    // Strategy: strip "> separators, then deduplicate adjacent phrases
-
-    // Strip full HTML-like tags
     s = s.replace(/<[^>]*>/g, ' ');
-    // Remove embedded URLs that leaked from PDF links
     s = s.replace(/https?:\/\/[^\s)">]*/g, '');
-    // Remove all quote + angle-bracket patterns: "> '> "> etc
     s = s.replace(/["'"'\u201C\u201D\u2018\u2019]*\s*>/g, ' ');
-    // Any remaining lone angle brackets
     s = s.replace(/[<>]/g, ' ');
-    // Collapse whitespace
+    s = s.replace(/\*\*([^*]+)\*\*/g, '$1');
     s = s.replace(/\s+/g, ' ').trim();
-
-    // Deduplicate adjacent repeated phrases (1-6 words), multiple passes
     for (var pass = 0; pass < 5; pass++) {
       var prev = s;
       s = s.replace(/\b((?:\w+\s+){0,5}\w+)\s+\1\b/gi, '$1');
       if (s === prev) break;
     }
-
-    // Normalize smart quotes to ASCII
     s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
-    // Repeated punctuation
     s = s.replace(/([.,;:!?])\1+/g, '$1');
-    // Leading conjunctions
     s = s.replace(/^\s*(And|But|Or)\s+/i, '');
-    // Collapse whitespace
     s = s.replace(/\s+/g, ' ').trim();
-    // Capitalize first letter
+    if (!s) return '';
     s = s.replace(/^([a-z])/, function(m) { return m.toUpperCase(); });
-    // Ensure terminal punctuation
-    s = s.replace(/([^.!?])\s*$/, '$1.');
-
+    if (!/[.!?]$/.test(s)) s += '.';
     return s;
   }
 
