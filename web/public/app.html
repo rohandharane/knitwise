@@ -1179,6 +1179,68 @@ button {
 /* ─────────────────────────────────────────
    DESKTOP BREAKPOINTS
 ───────────────────────────────────────── */
+/* ─────────────────────────────────────────
+   DESKTOP SECTION SIDEBAR
+───────────────────────────────────────── */
+.section-sidebar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .section-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: fixed;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 12px 0;
+    scrollbar-width: none;
+  }
+  .section-sidebar::-webkit-scrollbar { display: none; }
+
+  .section-sidebar .sb-item {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 450;
+    color: var(--text-3);
+    background: none;
+    border: none;
+    border-left: 2px solid transparent;
+    padding: 6px 14px 6px 12px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+    transition: color 160ms var(--ease-out), background 160ms var(--ease-out), border-color 160ms var(--ease-out);
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+  .section-sidebar .sb-item:hover {
+    color: var(--text);
+    background: var(--muted-fill);
+  }
+  .section-sidebar .sb-item.active {
+    color: var(--text);
+    font-weight: 550;
+    border-left-color: var(--accent);
+    background: var(--muted-fill);
+  }
+  .section-sidebar .sb-step-count {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-3);
+    margin-left: 4px;
+    opacity: 0.7;
+  }
+}
+
 @media (min-width: 768px) {
   .screen {
     max-width: 600px;
@@ -1308,6 +1370,8 @@ button {
 
 <!-- ── STEP READER ── -->
 <div id="screen-step" class="screen">
+  <!-- Desktop section sidebar -->
+  <nav class="section-sidebar" id="section-sidebar" aria-label="Pattern sections"></nav>
   <div class="step-topbar">
     <div class="topbar-pattern" id="topbar-pattern"></div>
     <div class="topbar-size-chip" id="size-chip"></div>
@@ -1581,8 +1645,10 @@ INSTRUCTION RULES:
 - Use second-person imperative voice: "Knit 10 stitches." not "The knitter knits 10 stitches."
 - Each instruction must be a complete, grammatically correct sentence ending with a period.
 - Capitalize the first word of every instruction.
+- The input may come from a web page saved as PDF. Such files contain embedded hyperlinks whose anchor text leaks into the extracted text as duplicated phrases separated by "> or similar junk. Example: 'stitch marker">stitch marker">removable stitch marker">stitch marker' — this must be cleaned to just 'removable stitch marker'. ALWAYS deduplicate and strip these artifacts.
 - NEVER include HTML tags, angle brackets (< >), quotation marks around terms, or link-like artifacts (e.g. knit">pick up is WRONG — write "knit, pick up").
 - NEVER produce fragments like word">word or word'>word in instructions — these are formatting errors.
+- If the same knitting term appears multiple times in a row (e.g. from hyperlink duplication), keep only ONE occurrence.
 - NEVER leave abbreviations unexpanded — always write the full word (k -> knit, p -> purl, yo -> yarn over, k2tog -> knit 2 together, ssk -> slip slip knit, CO -> cast on, BO -> bind off).
 - NEVER pass through raw pattern notation — translate everything into plain English.
 - NEVER start an instruction with a conjunction (And, But, Or).
@@ -1981,8 +2047,50 @@ EXAMPLE — Output steps (abbreviated):
     if (activePatternId) {
       updateLibraryMeta(activePatternId, { totalSteps: steps.length });
     }
+    buildSectionSidebar();
     showScreen('step');
     render();
+  }
+
+  function buildSectionSidebar() {
+    var sb = $('section-sidebar');
+    if (!sb) return;
+    sb.innerHTML = '';
+    if (!steps || !steps.length) return;
+
+    // Build ordered list of unique sections with first step index and count
+    var sections = [];
+    var sectionMap = {};
+    steps.forEach(function(s, i) {
+      var sec = s.section || 'Pattern';
+      if (!(sec in sectionMap)) {
+        sectionMap[sec] = { name: sec, firstIdx: i, count: 0 };
+        sections.push(sectionMap[sec]);
+      }
+      sectionMap[sec].count++;
+    });
+
+    sections.forEach(function(sec) {
+      var btn = document.createElement('button');
+      btn.className = 'sb-item';
+      btn.setAttribute('data-section', sec.name);
+      btn.innerHTML = esc(sec.name) + '<span class="sb-step-count">' + sec.count + '</span>';
+      btn.addEventListener('click', function() {
+        idx = sec.firstIdx;
+        render();
+        debouncedSaveProgress();
+      });
+      sb.appendChild(btn);
+    });
+  }
+
+  function updateSidebarActive() {
+    var sb = $('section-sidebar');
+    if (!sb || !steps || !steps[idx]) return;
+    var current = steps[idx].section || 'Pattern';
+    sb.querySelectorAll('.sb-item').forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-section') === current);
+    });
   }
 
   function render() {
@@ -1992,6 +2100,7 @@ EXAMPLE — Output steps (abbreviated):
     $('progress-fill').style.width = ((idx / (total - 1)) * 100) + '%';
     $('topbar-pos').textContent = 'Step ' + (idx + 1) + ' of ' + total;
     $('section-label').textContent = step.section;
+    updateSidebarActive();
 
     // Build instruction with size resolution and glossary terms
     let instruction = sanitizeInstructionText(step.instruction || '');
@@ -2411,26 +2520,44 @@ EXAMPLE — Output steps (abbreviated):
 
   function sanitizeInstructionText(text) {
     if (!text) return '';
-    return String(text)
-      // Model artifact: word">word or word">word (glossary link leakage)
-      .replace(/[""''\u201C\u201D\u2018\u2019]?\s*>\s*(?=[a-zA-Z])/g, ' ')
-      // Strip full HTML-like tags
-      .replace(/<[^>]*>/g, ' ')
-      // Any remaining lone angle brackets
-      .replace(/[<>]/g, ' ')
-      // Normalize smart quotes to ASCII
-      .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'")
-      // Repeated punctuation
-      .replace(/([.,;:!?])\1+/g, '$1')
-      // Leading conjunctions
-      .replace(/^\s*(And|But|Or)\s+/i, '')
-      // Collapse whitespace
-      .replace(/\s+/g, ' ')
-      .trim()
-      // Capitalize first letter
-      .replace(/^([a-z])/, function(m) { return m.toUpperCase(); })
-      // Ensure terminal punctuation
-      .replace(/([^.!?])\s*$/, '$1.');
+    var s = String(text);
+
+    // ── PDF hyperlink artifact cleanup ──
+    // Web-to-PDF files produce chains like: word">word">word
+    // Strategy: strip "> separators, then deduplicate adjacent phrases
+
+    // Strip full HTML-like tags
+    s = s.replace(/<[^>]*>/g, ' ');
+    // Remove embedded URLs that leaked from PDF links
+    s = s.replace(/https?:\/\/[^\s)">]*/g, '');
+    // Remove all quote + angle-bracket patterns: "> '> "> etc
+    s = s.replace(/["'"'\u201C\u201D\u2018\u2019]*\s*>/g, ' ');
+    // Any remaining lone angle brackets
+    s = s.replace(/[<>]/g, ' ');
+    // Collapse whitespace
+    s = s.replace(/\s+/g, ' ').trim();
+
+    // Deduplicate adjacent repeated phrases (1-6 words), multiple passes
+    for (var pass = 0; pass < 5; pass++) {
+      var prev = s;
+      s = s.replace(/\b((?:\w+\s+){0,5}\w+)\s+\1\b/gi, '$1');
+      if (s === prev) break;
+    }
+
+    // Normalize smart quotes to ASCII
+    s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+    // Repeated punctuation
+    s = s.replace(/([.,;:!?])\1+/g, '$1');
+    // Leading conjunctions
+    s = s.replace(/^\s*(And|But|Or)\s+/i, '');
+    // Collapse whitespace
+    s = s.replace(/\s+/g, ' ').trim();
+    // Capitalize first letter
+    s = s.replace(/^([a-z])/, function(m) { return m.toUpperCase(); });
+    // Ensure terminal punctuation
+    s = s.replace(/([^.!?])\s*$/, '$1.');
+
+    return s;
   }
 
   function splitDenseInstruction(instruction) {
@@ -2630,8 +2757,10 @@ EXAMPLE — Output steps (abbreviated):
       var instructions = steps.map(function(s) { return s.instruction || ''; });
       var polishPrompt = 'You are a knitting instruction editor. Your tone is clear, calm, and encouraging.\n' +
         'Clean up these instructions:\n' +
+        '- CRITICAL: Remove PDF hyperlink artifacts. Patterns like word">word, word\'>word, or chains of duplicated terms separated by "> must be collapsed to a single clean phrase. Example: \'stitch marker">stitch marker">removable stitch marker">stitch marker\' becomes \'removable stitch marker\'.\n' +
+        '- Remove ALL stray characters: >, <, angle brackets, quotation artifacts (" \' > <), any HTML tag fragments.\n' +
+        '- Remove any duplicated adjacent phrases (e.g. "stitch marker stitch marker" → "stitch marker").\n' +
         '- Fix punctuation, capitalization, and grammar.\n' +
-        '- Remove stray characters (>, <, angle brackets, quotation artifacts).\n' +
         '- Expand any remaining abbreviations into full words.\n' +
         '- Keep meaning identical — do not add or remove information.\n' +
         '- Use second-person imperative voice ("Knit 10 stitches." not "You should knit 10.").\n' +
