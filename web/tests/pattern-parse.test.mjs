@@ -105,6 +105,15 @@ describe('Banner Scarf–style garbage', () => {
     expect(cleaned.toLowerCase()).toContain('scrap yarn');
   });
 
+  it('sanitizes curly-quote variants \u201C>[term] (LLM sometimes uses smart quotes)', () => {
+    const bad =
+      'Cast on 7 stitches\u201D>[stitches] using the long-tail cast on\u201C>[long-tail cast on\u201C>[cast on] method.';
+    const cleaned = sanitizeInstructionText(bad);
+    expect(cleaned).not.toMatch(/["\u201C\u201D]>/);
+    expect(cleaned).not.toMatch(/\[/);
+    expect(hasHtmlArtifacts(cleaned)).toBe(false);
+  });
+
   it('removes markdown **bold** and does not leave ** in output', () => {
     const s = sanitizeInstructionText('Knit the next **stitch** with care.');
     expect(s).not.toContain('**');

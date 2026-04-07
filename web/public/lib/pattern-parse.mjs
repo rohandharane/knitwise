@@ -101,7 +101,7 @@ export function dedupeConsecutiveBigrams(text) {
 export function hasHtmlArtifacts(text) {
   const t = String(text || '');
   if (!t) return false;
-  if (/">/.test(t)) return true;
+  if (/["\u201C\u201D]>/.test(t)) return true;
   if (/<\//.test(t) || /\/>/.test(t)) return true;
   if (/&lt;|&gt;|&amp;|&#\d+;|&#x[0-9a-f]+;/i.test(t)) return true;
   if (/<[a-z!?/]/i.test(t)) return true;
@@ -169,6 +169,11 @@ export function sanitizeInstructionText(text) {
     s = stripMarkdownBold(s);
   } while (s !== prevS);
   s = stripSingleAsteriskEmphasis(s);
+  // Normalize curly/smart quotes to straight BEFORE artifact stripping so all
+  // passes below match regardless of whether the LLM used " or \u201C/\u201D.
+  s = s
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'");
   // Strip PDF hyperlink artifact chains.
   // Pass 1 — bracket format: term">[term]">[nested term">[inner]] (] is a natural stop)
   //   e.g.  knit">[knit]">[knit]                       → knit
@@ -184,9 +189,6 @@ export function sanitizeInstructionText(text) {
     .replace(/(?:'>[^'>\[\n]+(?='>))+/g, '');
   // Pass 3 — strip any remaining single "> / '> artifact (final chain item or isolated)
   s = s.replace(/">\s*/g, ' ').replace(/'>\s*/g, ' ');
-  s = s
-    .replace(/[\u201C\u201D]/g, '"')
-    .replace(/[\u2018\u2019]/g, "'");
   s = collapseWhitespace(s);
   s = dedupeConsecutiveTokens(s);
   s = dedupeConsecutiveBigrams(s);
