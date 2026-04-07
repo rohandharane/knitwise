@@ -215,8 +215,12 @@ export function sanitizeInstructionText(text) {
   s = s
     .replace(/(?:">[a-zA-Z][a-zA-Z\s-]{0,35}(?=">))+/g, '')
     .replace(/(?:'>[a-zA-Z][a-zA-Z\s-]{0,35}(?='>))+/g, '');
-  // Pass 4 — strip any remaining single "> / '> artifact (final chain item or isolated)
-  s = s.replace(/">\s*/g, ' ').replace(/'>\s*/g, ' ');
+  // Pass 4 — character-agnostic > strip: remove any non-word/non-space char before >
+  //   This catches ALL quote variants (ASCII, curly, fullwidth, double-prime, etc.)
+  //   without enumerating them. Knitting instructions never legitimately use > after a symbol.
+  //   e.g.  round">Join  →  round Join
+  //         round\uFF02>Join  →  round Join  (any Unicode quote lookalike)
+  s = s.replace(/[^\w\s]>\s*/g, ' ');
   s = collapseWhitespace(s);
   s = dedupeConsecutiveTokens(s);
   s = dedupeConsecutiveBigrams(s);
