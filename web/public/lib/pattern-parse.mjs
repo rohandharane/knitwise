@@ -145,6 +145,22 @@ export function maxWordFrequency(text) {
   return max;
 }
 
+export function maxWordFrequencyMinLen(text, minLen = 1) {
+  const words = String(text || '')
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => w.replace(/[^a-z0-9]/gi, ''))
+    .filter((w) => w.length >= minLen);
+  const m = new Map();
+  let max = 0;
+  for (const w of words) {
+    const n = (m.get(w) || 0) + 1;
+    m.set(w, n);
+    max = Math.max(max, n);
+  }
+  return max;
+}
+
 /**
  * Normalize pasted / fetched pattern text before sending to the model.
  */
@@ -225,7 +241,9 @@ export function validateInstructionPlainText(text, options = {}) {
   if (hasHtmlArtifacts(text)) {
     reasons.push('html_artifacts');
   }
-  if (maxWordFrequency(text) > maxRepeat) {
+  // Only count content words (≥5 chars) to avoid false positives from common
+  // function words like "the", "and", "with", "knit", "yarn" repeating naturally.
+  if (maxWordFrequencyMinLen(text, 5) > maxRepeat) {
     reasons.push(`word_repeated_more_than_${maxRepeat}_times`);
   }
   if (maxConsecutiveSameWord(text) > maxConsec) {
