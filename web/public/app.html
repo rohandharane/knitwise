@@ -1585,7 +1585,7 @@ import {
   filterAndValidateSteps as _modFilterSteps,
   rawInstructionNeedsRepair as _modNeedsRepair,
   normalizeInputForParsing as _modNormalizeInput
-} from '/lib/pattern-parse.mjs';
+} from '/lib/pattern-parse.mjs?v=4';
 window.__kw_sanitize = _modSanitize;
 window.__kw_filterSteps = _modFilterSteps;
 window.__kw_needsRepair = _modNeedsRepair;
@@ -1911,6 +1911,11 @@ EXAMPLE — Output steps (abbreviated):
     }
 
     normalizeGlossary();
+    // Re-sanitize saved steps in case they were stored before current sanitization fixes
+    if (window.__kw_filterSteps && patternData.steps && patternData.steps.length) {
+      var refiltered = window.__kw_filterSteps(patternData.steps, { maxWordRepeat: 8 });
+      if (refiltered.steps.length) patternData.steps = refiltered.steps;
+    }
     startReader();
     updateLibraryMeta(id, { lastOpenedAt: Date.now() });
   }
@@ -2310,6 +2315,8 @@ EXAMPLE — Output steps (abbreviated):
 
     // Build instruction with size resolution and glossary terms
     let instruction = sanitizeInstructionText(step.instruction || '');
+    // Hard strip: belt-and-suspenders in case any "> artifact survived the sanitization pipeline
+    instruction = instruction.replace(/">\s*/g, ' ').replace(/'>\s*/g, ' ').replace(/\s+/g, ' ').trim();
     if (step.sizeValues && chosenSizeKey && step.sizeValues[chosenSizeKey]) {
       const val = step.sizeValues[chosenSizeKey];
       if (!instruction.includes(val)) instruction += ' (' + val + ')';
