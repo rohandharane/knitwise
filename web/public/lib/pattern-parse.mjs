@@ -181,12 +181,14 @@ export function sanitizeInstructionText(text) {
   s = String(s)
     .replace(/(?:">\[[^\]]*\])+/g, '')
     .replace(/(?:'>\[[^\]]*\])+/g, '');
-  // Pass 2 — no-bracket chain interior: strip consecutive ">term only when another "> follows.
-  //   This safely removes all but the last item, which pass 3 cleans up.
+  // Pass 2 — no-bracket chain interior: strip ">TERM only when immediately followed by another ">
+  //   Restrict to letters/spaces/hyphens so digits break the match — this prevents consuming
+  //   legitimate sentence content like "7 stitches using a" that sits between two separate chains.
   //   e.g.  sm">sm">removable sm">sm or yarn → sm">sm or yarn (then pass 3 + dedup)
+  //   e.g.  co">co 7 stitches using a co">co">long-tail co">co → co">co 7 stitches using a co">co
   s = s
-    .replace(/(?:">[^">\[\n]+(?=">))+/g, '')
-    .replace(/(?:'>[^'>\[\n]+(?='>))+/g, '');
+    .replace(/(?:">[a-zA-Z][a-zA-Z\s-]{0,35}(?=">))+/g, '')
+    .replace(/(?:'>[a-zA-Z][a-zA-Z\s-]{0,35}(?='>))+/g, '');
   // Pass 3 — strip any remaining single "> / '> artifact (final chain item or isolated)
   s = s.replace(/">\s*/g, ' ').replace(/'>\s*/g, ' ');
   s = collapseWhitespace(s);
