@@ -181,15 +181,24 @@ export function sanitizeInstructionText(text) {
   s = String(s)
     .replace(/(?:">\[[^\]]*\])+/g, '')
     .replace(/(?:'>\[[^\]]*\])+/g, '');
-  // Pass 2 — no-bracket chain interior: strip ">TERM only when immediately followed by another ">
-  //   Restrict to letters/spaces/hyphens so digits break the match — this prevents consuming
-  //   legitimate sentence content like "7 stitches using a" that sits between two separate chains.
-  //   e.g.  sm">sm">removable sm">sm or yarn → sm">sm or yarn (then pass 3 + dedup)
-  //   e.g.  co">co 7 stitches using a co">co">long-tail co">co → co">co 7 stitches using a co">co
+  // Pass 2 — exact A">A collapse: remove ">\1 when the same phrase appears on both sides.
+  //   Handles 1-5 word phrases of letters/hyphens only (no digits). Runs in a loop because
+  //   one pass may expose a new duplicate (e.g. A">A">B">A → A">B">A after pass 1 → A">A).
+  //   Works for any phrase length, so 3-word terms like "holding yarn double">holding yarn double"
+  //   are collapsed without relying on bigram deduplication.
+  for (let _p2 = 0; _p2 < 12; _p2++) {
+    const _before = s;
+    s = s.replace(/\b([a-zA-Z][a-zA-Z-]*(?:\s+[a-zA-Z][a-zA-Z-]*){0,4})">\1/gi, '$1');
+    s = s.replace(/\b([a-zA-Z][a-zA-Z-]*(?:\s+[a-zA-Z][a-zA-Z-]*){0,4})'>\1/gi, '$1');
+    if (s === _before) break;
+  }
+  // Pass 3 — chain interior (non-exact): strip ">TERM when another "> follows immediately.
+  //   Letters/spaces/hyphens only so digits stop the match and protect sentence content.
+  //   e.g.  co">long-tail co">co  →  co">co  (then pass 4 + dedup handles the final item)
   s = s
     .replace(/(?:">[a-zA-Z][a-zA-Z\s-]{0,35}(?=">))+/g, '')
     .replace(/(?:'>[a-zA-Z][a-zA-Z\s-]{0,35}(?='>))+/g, '');
-  // Pass 3 — strip any remaining single "> / '> artifact (final chain item or isolated)
+  // Pass 4 — strip any remaining single "> / '> artifact (final chain item or isolated)
   s = s.replace(/">\s*/g, ' ').replace(/'>\s*/g, ' ');
   s = collapseWhitespace(s);
   s = dedupeConsecutiveTokens(s);
