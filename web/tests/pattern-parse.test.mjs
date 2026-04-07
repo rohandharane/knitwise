@@ -120,14 +120,14 @@ describe('Banner Scarf–style garbage', () => {
     expect(s.toLowerCase()).toContain('stitch');
   });
 
-  it('filterAndValidateSteps: accepts steps where "knit" appears 4+ times naturally', () => {
+  it('filterAndValidateSteps: accepts steps where "knit" appears many times naturally', () => {
     const steps = [
       {
         id: 1,
         type: 'normal',
         section: 'Body',
         instruction:
-          'Row 8 (right side): Slip one knitwise, knit to end of row, pick up and knit six stitches along the side edge.',
+          'Slip 1 stitch knitwise, knit to the last 2 stitches, knit front and back, knit 1, then pick up and knit 6 stitches along the right side edge, knit across, knit to end.',
       },
     ];
     const { steps: out, log } = filterAndValidateSteps(steps);
