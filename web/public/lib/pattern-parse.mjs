@@ -215,7 +215,7 @@ export function sanitizeInstructionText(text) {
 
 export function validateInstructionPlainText(text, options = {}) {
   const minLen = options.minLen ?? 10;
-  const maxRepeat = options.maxWordRepeat ?? 3;
+  const maxRepeat = options.maxWordRepeat ?? 5;
   const maxConsec = options.maxConsecutiveSameWord ?? 2;
   const reasons = [];
   if (!text || String(text).trim().length < minLen) {

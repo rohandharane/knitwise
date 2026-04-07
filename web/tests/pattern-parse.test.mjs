@@ -120,6 +120,21 @@ describe('Banner Scarf–style garbage', () => {
     expect(s.toLowerCase()).toContain('stitch');
   });
 
+  it('filterAndValidateSteps: accepts steps where "knit" appears 4+ times naturally', () => {
+    const steps = [
+      {
+        id: 1,
+        type: 'normal',
+        section: 'Body',
+        instruction:
+          'Row 8 (right side): Slip one knitwise, knit to end of row, pick up and knit six stitches along the side edge.',
+      },
+    ];
+    const { steps: out, log } = filterAndValidateSteps(steps);
+    expect(out.length).toBe(1);
+    expect(log.rejected.length).toBe(0);
+  });
+
   it('rawInstructionNeedsRepair detects ** and broken anchor junk', () => {
     expect(rawInstructionNeedsRepair('plain knit row.')).toBe(false);
     expect(rawInstructionNeedsRepair('use **yarn** here')).toBe(true);
