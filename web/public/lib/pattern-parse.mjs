@@ -169,8 +169,21 @@ export function sanitizeInstructionText(text) {
     s = stripMarkdownBold(s);
   } while (s !== prevS);
   s = stripSingleAsteriskEmphasis(s);
-  // Leftover from broken anchor stripping — not full-tag regex stripping
-  s = String(s).replace(/\">\s*/g, ' ').replace(/'>\s*/g, ' ');
+  // Strip PDF hyperlink artifact chains.
+  // Pass 1 — bracket format: term">[term]">[nested term">[inner]] (] is a natural stop)
+  //   e.g.  knit">[knit]">[knit]                       → knit
+  //         cast on">[Cast on]">[long-tail co">[co]     → cast on
+  s = String(s)
+    .replace(/(?:">\[[^\]]*\])+/g, '')
+    .replace(/(?:'>\[[^\]]*\])+/g, '');
+  // Pass 2 — no-bracket chain interior: strip consecutive ">term only when another "> follows.
+  //   This safely removes all but the last item, which pass 3 cleans up.
+  //   e.g.  sm">sm">removable sm">sm or yarn → sm">sm or yarn (then pass 3 + dedup)
+  s = s
+    .replace(/(?:">[^">\[\n]+(?=">))+/g, '')
+    .replace(/(?:'>[^'>\[\n]+(?='>))+/g, '');
+  // Pass 3 — strip any remaining single "> / '> artifact (final chain item or isolated)
+  s = s.replace(/">\s*/g, ' ').replace(/'>\s*/g, ' ');
   s = s
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/[\u2018\u2019]/g, "'");

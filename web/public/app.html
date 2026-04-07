@@ -1786,10 +1786,12 @@ INSTRUCTION RULES:
 - Use second-person imperative voice: "Knit 10 stitches." not "The knitter knits 10 stitches."
 - Each instruction must be a complete, grammatically correct sentence ending with a period.
 - Capitalize the first word of every instruction.
-- The input may come from a web page saved as PDF. Such files contain embedded hyperlinks whose anchor text leaks into the extracted text as duplicated phrases separated by "> or similar junk. Example: 'stitch marker">stitch marker">removable stitch marker">stitch marker' — this must be cleaned to just 'removable stitch marker'. ALWAYS deduplicate and strip these artifacts.
-- NEVER include HTML tags, angle brackets (< >), quotation marks around terms, or link-like artifacts (e.g. knit">pick up is WRONG — write "knit, pick up").
-- NEVER produce fragments like word">word or word'>word in instructions — these are formatting errors.
-- If the same knitting term appears multiple times in a row (e.g. from hyperlink duplication), keep only ONE occurrence.
+- The input may come from a web page saved as PDF. Such PDFs embed hyperlinks on knitting terms (e.g. "stitch marker" links to a shop page, "long-tail cast on" links to a tutorial). When these are extracted, the link text leaks into the content as duplicated phrases. Two artifact formats appear:
+  1. No-bracket chain: 'stitch marker">stitch marker">removable stitch marker">stitch marker' — collapse the entire chain to the most complete/specific phrase: 'removable stitch marker'.
+  2. Bracket format: 'knit front and back">[knit front and back]' or 'cast on">[Cast on]">[long-tail cast on">[cast on]' — strip the entire ">[...] portion, keeping only the text before the first ">'.
+- NEVER include HTML tags, angle brackets (< >), quotation marks around terms, or link-like artifacts.
+- NEVER produce fragments like word">word, word'>word, or word">[word] in instructions — these are formatting errors from PDF hyperlink extraction.
+- If the same knitting term appears multiple times in a row (e.g. from hyperlink duplication), keep only ONE occurrence — the most descriptive one.
 - NEVER leave abbreviations unexpanded — always write the full word (k -> knit, p -> purl, yo -> yarn over, k2tog -> knit 2 together, ssk -> slip slip knit, CO -> cast on, BO -> bind off).
 - NEVER pass through raw pattern notation — translate everything into plain English.
 - NEVER start an instruction with a conjunction (And, But, Or).

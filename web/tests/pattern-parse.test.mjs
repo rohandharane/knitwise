@@ -62,6 +62,49 @@ describe('Banner Scarf–style garbage', () => {
     expect(maxConsecutiveSameWord(s)).toBeLessThanOrEqual(2);
   });
 
+  it('sanitizes ">[term] bracket-style PDF hyperlink artifacts', () => {
+    const bad =
+      'Cast on 236 stitches using the long-tail cast on">[long-tail cast on]">[cast on] method.';
+    const cleaned = sanitizeInstructionText(bad);
+    expect(cleaned).not.toMatch(/">/);
+    expect(cleaned).not.toMatch(/\[/);
+    expect(hasHtmlArtifacts(cleaned)).toBe(false);
+  });
+
+  it('sanitizes chained ">[term] artifacts (knit">[knit] style)', () => {
+    const bad =
+      'Set-Up Row (right side">[right side]): knit">[knit] to the last 2 stitches, knit">[knit]">[knit] front and back.';
+    const cleaned = sanitizeInstructionText(bad);
+    expect(cleaned).not.toMatch(/">/);
+    expect(cleaned).not.toMatch(/\[/);
+    expect(hasHtmlArtifacts(cleaned)).toBe(false);
+    expect(cleaned.toLowerCase()).toContain('right side');
+    expect(cleaned.toLowerCase()).toContain('knit');
+  });
+
+  it('sanitizes nested ">[long phrase">[short phrase] greedy artifacts', () => {
+    const bad =
+      'Mark with a stitch marker">[stitch marker]">[removable stitch marker">[stitch marker] or yarn.';
+    const cleaned = sanitizeInstructionText(bad);
+    expect(cleaned).not.toMatch(/">/);
+    expect(cleaned).not.toMatch(/\[/);
+    expect(hasHtmlArtifacts(cleaned)).toBe(false);
+    expect(cleaned.toLowerCase()).toContain('stitch marker');
+  });
+
+  it('sanitizes no-bracket chained artifacts: A">B">C">D keeps only A', () => {
+    // This is the format seen in the Banner Scarf mobile screenshot
+    const bad =
+      'Mark the previous row with a stitch marker">stitch marker">removable stitch marker">stitch marker">stitch marker">stitch marker">removable stitch marker">stitch marker or piece of scrap yarn.';
+    const cleaned = sanitizeInstructionText(bad);
+    expect(cleaned).not.toMatch(/">/);
+    expect(hasHtmlArtifacts(cleaned)).toBe(false);
+    // Should not have excessive repetition
+    expect(maxConsecutiveSameWord(cleaned)).toBeLessThanOrEqual(2);
+    expect(cleaned.toLowerCase()).toContain('stitch marker');
+    expect(cleaned.toLowerCase()).toContain('scrap yarn');
+  });
+
   it('removes markdown **bold** and does not leave ** in output', () => {
     const s = sanitizeInstructionText('Knit the next **stitch** with care.');
     expect(s).not.toContain('**');
