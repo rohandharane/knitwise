@@ -764,29 +764,36 @@ button {
 ───────────────────────────────────────── */
 #screen-step { overflow: hidden; }
 
+/* Step screen back button */
+.step-back-btn {
+  position: absolute;
+  top: calc(16px + var(--safe-top));
+  left: 20px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none; background: transparent; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 150ms var(--ease-out), transform 160ms var(--ease-out);
+  z-index: 10;
+}
+.step-back-btn:active { background: rgba(255,168,29,0.1); transform: scale(0.97); }
+@media (hover:hover) and (pointer:fine) {
+  .step-back-btn:hover { background: rgba(255,168,29,0.08); }
+}
+
 /* Top bar */
 .step-topbar {
-  margin: calc(12px + var(--safe-top)) 16px 0;
-  padding: 10px 14px 10px 10px;
+  margin: calc(52px + var(--safe-top)) 16px 0;
+  padding: 10px 14px;
   display: flex; align-items: center; gap: 10px; flex-shrink: 0;
   border: 1px solid var(--border-med);
   border-radius: 14px;
   background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-.topbar-back-btn {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--muted-fill);
-  border: none; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--text-2); font-size: 17px; line-height: 1;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 150ms var(--ease-out), transform 160ms var(--ease-out);
-}
-.topbar-back-btn:active { transform: scale(0.93); background: rgba(255,168,29,0.2); }
-@media (hover:hover) and (pointer:fine) {
-  .topbar-back-btn:hover { background: rgba(255,168,29,0.12); }
 }
 .topbar-pattern {
   font-family: var(--font-serif);
@@ -963,8 +970,8 @@ button {
   display: flex; flex-direction: column;
   min-height: 0; overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  mask-image: linear-gradient(to bottom, transparent 0px, black 22px, black calc(100% - 22px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 22px, black calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0px, black 20px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px);
 }
 .step-card { will-change: transform, opacity; }
 
@@ -1172,8 +1179,17 @@ button {
 
 /* Nav */
 .step-nav {
-  padding: 0 20px calc(32px + var(--safe-bottom));
+  padding: 12px 20px calc(32px + var(--safe-bottom));
   display: flex; gap: 10px; flex-shrink: 0;
+  position: relative;
+}
+.step-nav::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 100%;
+  height: 72px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
 }
 .nav-prev {
   width: 56px; height: 52px; flex-shrink: 0;
@@ -1659,8 +1675,8 @@ button {
 <div id="screen-step" class="screen">
   <!-- Desktop section sidebar -->
   <nav class="section-sidebar" id="section-sidebar" aria-label="Pattern sections"></nav>
+  <button class="step-back-btn" id="topbar-back">&larr; Library</button>
   <div class="step-topbar">
-    <button class="topbar-back-btn" id="topbar-back" aria-label="Back to library">&#8592;</button>
     <div class="topbar-pattern" id="topbar-pattern"></div>
     <div class="topbar-size-chip" id="size-chip"></div>
   </div>
