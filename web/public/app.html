@@ -767,17 +767,30 @@ button {
 /* Top bar */
 .step-topbar {
   margin: calc(12px + var(--safe-top)) 16px 0;
-  padding: 14px 20px;
-  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  padding: 10px 14px 10px 10px;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
   border: 1px solid var(--border-med);
-  border-radius: 10px;
+  border-radius: 14px;
   background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+.topbar-back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--muted-fill);
+  border: none; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-2); font-size: 17px; line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 150ms var(--ease-out), transform 160ms var(--ease-out);
+}
+.topbar-back-btn:active { transform: scale(0.93); background: rgba(255,168,29,0.2); }
+@media (hover:hover) and (pointer:fine) {
+  .topbar-back-btn:hover { background: rgba(255,168,29,0.12); }
+}
 .topbar-pattern {
   font-family: var(--font-serif);
-  font-size: 40px; line-height: 1.1;
+  font-size: 28px; line-height: 1.15;
   color: var(--text);
   flex: 1; min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -950,6 +963,8 @@ button {
   display: flex; flex-direction: column;
   min-height: 0; overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to bottom, transparent 0px, black 22px, black calc(100% - 22px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 22px, black calc(100% - 22px), transparent 100%);
 }
 .step-card { will-change: transform, opacity; }
 
@@ -1645,6 +1660,7 @@ button {
   <!-- Desktop section sidebar -->
   <nav class="section-sidebar" id="section-sidebar" aria-label="Pattern sections"></nav>
   <div class="step-topbar">
+    <button class="topbar-back-btn" id="topbar-back" aria-label="Back to library">&#8592;</button>
     <div class="topbar-pattern" id="topbar-pattern"></div>
     <div class="topbar-size-chip" id="size-chip"></div>
   </div>
@@ -2348,7 +2364,7 @@ EXAMPLE — Output steps (abbreviated):
       card.className = 'sp-card';
       card.style.animationDelay = (200 + i * 50) + 'ms';
       card.innerHTML =
-        `<div class="sp-card-size">${esc(size.label)}</div>` +
+        `<div class="sp-card-size">${esc(size.label.charAt(0))}</div>` +
         `<div class="sp-card-label">${esc(size.label)}</div>` +
         (size.details ? `<div class="sp-card-range">${esc(size.details)}</div>` : '');
       card.addEventListener('click', () => { chosenSizeKey = size.key; persistNewPattern(); startReader(); });
@@ -2729,11 +2745,7 @@ EXAMPLE — Output steps (abbreviated):
     navigate(1);
   });
 
-  // Back button: navigate back through steps, then return to upload
-  // (topbar-back was removed; we use nav-prev for back, and add a long-press on topbar-pattern to go home)
-  $('topbar-pattern').addEventListener('dblclick', () => {
-    if (confirm('Return to library?')) goHome();
-  });
+  $('topbar-back').addEventListener('click', goHome);
 
   // ─── GLOSSARY ───
   function openGlossary(key, event) {
