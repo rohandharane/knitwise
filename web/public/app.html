@@ -507,27 +507,72 @@ button {
 
 .file-input { display: none; }
 
-.or-divider {
-  font-family: var(--font-mono);
-  font-size: 10px; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: 0.14em;
+/* ── Discover section ── */
+.discover-section {
+  width: 100%; max-width: 400px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
   flex-shrink: 0;
   opacity: 0;
   animation: fadeUp 300ms var(--ease-out) 220ms forwards;
 }
 
-.paste-toggle {
+.discover-heading {
   font-family: var(--font-serif);
-  font-size: 16px; color: var(--accent);
-  padding: 8px 16px; border-radius: 8px;
-  flex-shrink: 0;
+  font-size: 16px; color: var(--text-2);
+  text-align: center; line-height: 1.55;
+}
+
+.discover-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.discover-pill {
+  display: flex; align-items: center; justify-content: center;
+  gap: 7px;
+  padding: 13px 16px;
+  border-radius: 1000px;
+  background: rgba(255,168,29,0.13);
+  font-family: var(--font-serif);
+  font-size: 15px; color: var(--text);
+  text-decoration: none;
   transition: background 150ms var(--ease-out), transform 160ms var(--ease-out);
   opacity: 0;
-  animation: fadeUp 300ms var(--ease-out) 260ms forwards;
+  animation: fadeUp 260ms var(--ease-out) forwards;
+}
+.discover-pill:nth-child(1) { animation-delay: 270ms; }
+.discover-pill:nth-child(2) { animation-delay: 310ms; }
+.discover-pill:nth-child(3) { animation-delay: 350ms; }
+.discover-pill:nth-child(4) { animation-delay: 390ms; }
+.discover-pill:active { transform: scale(0.97); background: rgba(255,168,29,0.22); }
+@media (hover: hover) and (pointer: fine) {
+  .discover-pill:hover { background: rgba(255,168,29,0.2); }
+}
+
+.discover-favicon {
+  width: 16px; height: 16px;
+  border-radius: 3px; flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* Paste toggle — subtle text link below discover section */
+.or-divider { display: none; }
+
+.paste-toggle {
+  font-family: var(--font-serif);
+  font-size: 15px; color: var(--text-3);
+  padding: 8px 16px; border-radius: 8px;
+  flex-shrink: 0;
+  transition: color 150ms var(--ease-out), transform 160ms var(--ease-out);
+  opacity: 0;
+  animation: fadeUp 300ms var(--ease-out) 440ms forwards;
 }
 .paste-toggle:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) {
-  .paste-toggle:hover { background: rgba(255,168,29,0.08); }
+  .paste-toggle:hover { color: var(--text); }
 }
 
 .paste-area {
@@ -1454,8 +1499,31 @@ button {
     <div class="drop-hint">or tap to browse</div>
     <input type="file" class="file-input" id="file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif">
   </div>
-  <div class="or-divider">or</div>
-  <button class="paste-toggle" id="paste-toggle">Paste pattern text</button>
+
+  <!-- Discover patterns section -->
+  <div class="discover-section">
+    <p class="discover-heading">Not sure where to get started?<br>Find your first pattern here</p>
+    <div class="discover-links">
+      <a class="discover-pill" href="https://www.purlsoho.com/patterns/" target="_blank" rel="noopener noreferrer">
+        <img class="discover-favicon" src="https://www.google.com/s2/favicons?domain=purlsoho.com&sz=32" alt="" width="16" height="16">
+        PurlSoho
+      </a>
+      <a class="discover-pill" href="https://www.petiteknit.com/collections/patterns" target="_blank" rel="noopener noreferrer">
+        <img class="discover-favicon" src="https://www.google.com/s2/favicons?domain=petiteknit.com&sz=32" alt="" width="16" height="16">
+        PetiteKnit
+      </a>
+      <a class="discover-pill" href="https://www.ravelry.com/patterns/library#free" target="_blank" rel="noopener noreferrer">
+        <img class="discover-favicon" src="https://www.google.com/s2/favicons?domain=ravelry.com&sz=32" alt="" width="16" height="16">
+        Ravelry
+      </a>
+      <a class="discover-pill" href="https://www.reddit.com/r/knitting/" target="_blank" rel="noopener noreferrer">
+        <img class="discover-favicon" src="https://www.google.com/s2/favicons?domain=reddit.com&sz=32" alt="" width="16" height="16">
+        r/knitting
+      </a>
+    </div>
+  </div>
+
+  <button class="paste-toggle" id="paste-toggle">or paste pattern text</button>
   <div class="paste-area" id="paste-area">
     <textarea id="paste-text" placeholder="Paste your knitting pattern here..."></textarea>
     <button class="btn-glass paste-submit" id="paste-submit">Read pattern</button>
