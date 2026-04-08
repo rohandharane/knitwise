@@ -1170,6 +1170,90 @@ button {
 }
 
 /* ─────────────────────────────────────────
+   REFERENCE IMAGES GALLERY
+───────────────────────────────────────── */
+.ref-gallery-wrap {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 20px 8px;
+}
+.ref-gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ref-gallery-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 12px;
+  cursor: pointer;
+  display: block;
+  background: var(--border-med);
+  opacity: 0;
+  animation: fadeUp 260ms var(--ease-out) forwards;
+  transition: transform 160ms var(--ease-out), opacity 180ms;
+}
+.ref-gallery-thumb:nth-child(2) { animation-delay: 40ms; }
+.ref-gallery-thumb:nth-child(3) { animation-delay: 80ms; }
+.ref-gallery-thumb:nth-child(4) { animation-delay: 120ms; }
+.ref-gallery-thumb:nth-child(5) { animation-delay: 160ms; }
+.ref-gallery-thumb:nth-child(6) { animation-delay: 200ms; }
+.ref-gallery-thumb:nth-child(7) { animation-delay: 240ms; }
+.ref-gallery-thumb:nth-child(8) { animation-delay: 280ms; }
+.ref-gallery-thumb:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .ref-gallery-thumb:hover { opacity: 0.84; transform: scale(1.01); }
+}
+
+/* Lightbox */
+.ref-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.93);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+  pointer-events: none;
+}
+.ref-lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ref-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  transform: scale(0.95);
+  transition: transform 220ms var(--ease-out);
+}
+.ref-lightbox.open img { transform: scale(1); }
+.ref-lightbox-close {
+  position: absolute;
+  top: calc(16px + var(--safe-top));
+  right: 20px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 22px;
+  line-height: 36px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 150ms;
+}
+.ref-lightbox-close:active { background: rgba(255, 255, 255, 0.28); }
+@media (hover: hover) and (pointer: fine) {
+  .ref-lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
+}
+
+/* ─────────────────────────────────────────
    DONE SCREEN
 ───────────────────────────────────────── */
 #screen-done {
@@ -1573,7 +1657,7 @@ button {
       </div>
     </div>
   </div>
-  <div class="step-card-wrap">
+  <div class="step-card-wrap" id="step-card-wrap">
     <div class="step-card" id="step-card">
       <div class="step-instruction" id="step-instruction"></div>
       <div class="repeat-block" id="repeat-block">
@@ -1583,6 +1667,14 @@ button {
       </div>
       <div class="step-tip" id="step-tip" style="display:none"></div>
     </div>
+  </div>
+  <div class="ref-gallery-wrap" id="ref-gallery-wrap" style="display:none">
+    <div class="ref-gallery-grid" id="ref-gallery-grid"></div>
+  </div>
+  <!-- Lightbox -->
+  <div class="ref-lightbox" id="ref-lightbox" role="dialog" aria-modal="true">
+    <button class="ref-lightbox-close" id="ref-lightbox-close" aria-label="Close">&#215;</button>
+    <img id="ref-lightbox-img" src="" alt="Pattern reference page">
   </div>
   <div class="step-nav">
     <button class="btn-glass nav-prev" id="nav-prev" disabled>&#8592;</button>
@@ -1728,6 +1820,28 @@ window.dispatchEvent(new Event('kw-module-ready'));
       pages.push({ data: b64, mediaType: 'image/jpeg' });
     }
     return pages;
+  }
+
+  // Renders PDF pages to small data-URL thumbnails for the reference images gallery.
+  // Runs at lower resolution than pdfToImages (gallery display only, not API input).
+  async function pdfToThumbnails(arrayBuffer) {
+    if (typeof pdfjsLib === 'undefined') return null;
+    try {
+      var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      var n = Math.min(pdf.numPages, 12);
+      var thumbs = [];
+      for (var i = 1; i <= n; i++) {
+        var page = await pdf.getPage(i);
+        var baseVp = page.getViewport({ scale: 1 });
+        var scale = 480 / baseVp.width; // target ~480px wide
+        var vp = page.getViewport({ scale: scale });
+        var c = document.createElement('canvas');
+        c.width = vp.width; c.height = vp.height;
+        await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+        thumbs.push(c.toDataURL('image/jpeg', 0.60));
+      }
+      return thumbs;
+    } catch (e) { return null; }
   }
 
   // ─── PERSISTENCE LAYER ───
@@ -2034,6 +2148,13 @@ EXAMPLE — Output steps (abbreviated):
     try {
       if (file.name.toLowerCase().endsWith('.pdf')) {
         var ab = await file.arrayBuffer();
+
+        // Kick off thumbnail rendering in parallel — completes well before the API returns.
+        window.__kw_pendingRefImages = null;
+        pdfToThumbnails(ab.slice(0)).then(function(thumbs) {
+          if (thumbs && thumbs.length) window.__kw_pendingRefImages = thumbs;
+        });
+
         var b64raw = btoa(new Uint8Array(ab).reduce(function(s, b) { return s + String.fromCharCode(b); }, ''));
 
         if (b64raw.length < MAX_PAYLOAD_BYTES) {
@@ -2269,6 +2390,30 @@ EXAMPLE — Output steps (abbreviated):
     steps = expandDenseSteps(patternData.steps || []);
     if (idx >= steps.length) idx = steps.length - 1;
     if (idx < 0) idx = 0;
+
+    // ── Reference images: persist newly rendered thumbnails, then inject gallery step ──
+    if (activePatternId) {
+      if (window.__kw_pendingRefImages) {
+        try {
+          sessionStorage.setItem(
+            'knitwise:refimages:' + activePatternId,
+            JSON.stringify(window.__kw_pendingRefImages)
+          );
+        } catch (e) {}
+        window.__kw_pendingRefImages = null;
+      }
+      try {
+        var storedThumbs = sessionStorage.getItem('knitwise:refimages:' + activePatternId);
+        if (storedThumbs) {
+          var refImages = JSON.parse(storedThumbs);
+          if (refImages && refImages.length) {
+            steps.push({ section: 'Reference Images', instruction: '__gallery__', _refImages: refImages });
+            if (!sectionColorMap['Reference Images']) sectionColorMap['Reference Images'] = 'muted';
+          }
+        }
+      } catch (e) {}
+    }
+
     loadJourneyNotes();
     syncJourneyNotesField();
     $('topbar-pattern').textContent = patternData.title || 'Pattern';
@@ -2378,14 +2523,67 @@ EXAMPLE — Output steps (abbreviated):
     if (e.target === this) closeSectionPicker();
   });
 
+  // ── Lightbox event handlers ──
+  $('ref-lightbox-close').addEventListener('click', closeLightbox);
+  $('ref-lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  function renderRefGallery(images) {
+    var grid = $('ref-gallery-grid');
+    if (!grid || !images) return;
+    // Rebuild only when images set changes
+    if (grid.dataset.builtFor === String(images.length)) return;
+    grid.dataset.builtFor = String(images.length);
+    grid.innerHTML = '';
+    images.forEach(function(dataUrl, i) {
+      var img = document.createElement('img');
+      img.className = 'ref-gallery-thumb';
+      img.src = dataUrl;
+      img.alt = 'Page ' + (i + 1);
+      img.style.animationDelay = (i * 40) + 'ms';
+      img.addEventListener('click', function() { openLightbox(dataUrl); });
+      grid.appendChild(img);
+    });
+  }
+
+  function openLightbox(src) {
+    var lb = $('ref-lightbox');
+    var lbImg = $('ref-lightbox-img');
+    if (!lb || !lbImg) return;
+    lbImg.src = src;
+    requestAnimationFrame(function() { lb.classList.add('open'); });
+  }
+
+  function closeLightbox() {
+    var lb = $('ref-lightbox');
+    if (lb) lb.classList.remove('open');
+  }
+
   function render() {
     const step = steps[idx];
     const total = steps.length;
+    const isGallery = step.instruction === '__gallery__';
 
     $('progress-fill').style.width = ((idx / (total - 1)) * 100) + '%';
     $('topbar-pos').textContent = 'Step ' + (idx + 1) + ' of ' + total;
     $('section-label').textContent = step.section;
     updateSidebarActive();
+
+    // Toggle between step card and gallery view
+    $('step-card-wrap').style.display = isGallery ? 'none' : '';
+    $('ref-gallery-wrap').style.display = isGallery ? '' : 'none';
+
+    if (isGallery) {
+      renderRefGallery(step._refImages);
+      $('nav-prev').disabled = (idx === 0);
+      updateNextBtn(step);
+      syncJourneyNotesField();
+      return;
+    }
 
     // Build instruction with size resolution and glossary terms
     let instruction = sanitizeInstructionText(step.instruction || '');
