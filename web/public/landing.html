@@ -1307,16 +1307,39 @@ a { color: inherit; text-decoration: none; }
     });
   }
 
+  function mergeDemoManifests(a, b) {
+    var out = {};
+    function take(map) {
+      if (!map || typeof map !== 'object') return;
+      var k;
+      for (k in map) {
+        if (!Object.prototype.hasOwnProperty.call(map, k)) continue;
+        if (typeof map[k] === 'string' && /^https?:\/\//.test(map[k])) {
+          out[k] = map[k];
+        }
+      }
+    }
+    take(a);
+    take(b);
+    return out;
+  }
+
   function bootLandingDemos() {
-    fetch('/media-cdn.json', { credentials: 'same-origin' })
-      .then(function (r) {
+    function loadJson(url) {
+      return fetch(url, { credentials: 'same-origin' }).then(function (r) {
         if (!r.ok) return null;
         var ct = (r.headers.get('content-type') || '').toLowerCase();
         if (ct.indexOf('application/json') === -1) return null;
         return r.json();
-      })
-      .then(function (map) {
-        applyDemoCdnManifest(map);
+      });
+    }
+
+    Promise.all([
+      loadJson('/media-cdn.json'),
+      loadJson('/api/landing-demo-manifest'),
+    ])
+      .then(function (pair) {
+        applyDemoCdnManifest(mergeDemoManifests(pair[0], pair[1]));
       })
       .catch(function () {})
       .finally(function () {
