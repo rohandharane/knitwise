@@ -1,6 +1,7 @@
 import { list } from '@vercel/blob';
 
-export const config = { runtime: 'edge' };
+/** Node required: @vercel/blob uses Node streams (not Edge-compatible). */
+export const config = { runtime: 'nodejs20.x', maxDuration: 15 };
 
 /** Must match scripts/upload-landing-demos-to-blob.mjs */
 const PREFIX = 'knitwise/landing-demos/';
