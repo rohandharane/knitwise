@@ -15,6 +15,30 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+/** Load web/.env.local if present (e.g. after `vercel env pull .env.local`). */
+function loadEnvLocal() {
+  var p = join(__dirname, '..', '.env.local');
+  if (!existsSync(p)) return;
+  var text = readFileSync(p, 'utf8');
+  var lines = text.split(/\r?\n/);
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line || line.indexOf('#') === 0) continue;
+    var eq = line.indexOf('=');
+    if (eq === -1) continue;
+    var key = line.slice(0, eq).trim();
+    var val = line.slice(eq + 1).trim();
+    if (
+      (val.charAt(0) === '"' && val.charAt(val.length - 1) === '"') ||
+      (val.charAt(0) === "'" && val.charAt(val.length - 1) === "'")
+    ) {
+      val = val.slice(1, -1);
+    }
+    if (!process.env[key]) process.env[key] = val;
+  }
+}
+loadEnvLocal();
 const publicDir = join(__dirname, '..', 'public');
 const mediaDir = join(publicDir, 'media');
 const manifestPath = join(publicDir, 'media-cdn.json');
