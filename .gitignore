@@ -15,10 +15,38 @@ node_modules/
 *.keystore
 
 # ─── Local agent / IDE (not app source) ───
+/skills/
 .adal/
 .agents/
+.augment/
+.bob/
 .claude/
+.codebuddy/
+.commandcode/
+.continue/
+.cortex/
+.crush/
 .cursor/
+.factory/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
 
 # ─── OS ───
 .DS_Store
