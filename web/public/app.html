@@ -2620,11 +2620,15 @@ EXAMPLE — Output steps (abbreviated):
     }
 
     // Build instruction with size resolution and glossary terms
+    console.log('[KW render] raw step.instruction:', JSON.stringify(step.instruction));
+    console.log('[KW render] window.__kw_sanitize set:', !!window.__kw_sanitize);
     let instruction = sanitizeInstructionText(step.instruction || '');
+    console.log('[KW render] after sanitize:', JSON.stringify(instruction));
     // Hard strip: belt-and-suspenders covering all Unicode quote lookalikes + ASCII "> artifacts
     instruction = instruction.replace(/["\u201C-\u201F\u2033\u2036\uFF02\u02BA\u275D\u275E\u301D\u301F]>\s*/g, ' ')
       .replace(/['\u2018\u2019\u201A\u201B\u2032\u2035\uFF07\u02B9\u275B\u275C]>\s*/g, ' ')
       .replace(/\s+/g, ' ').trim();
+    console.log('[KW render] after hard strip:', JSON.stringify(instruction));
     if (step.sizeValues && chosenSizeKey && step.sizeValues[chosenSizeKey]) {
       const val = step.sizeValues[chosenSizeKey];
       if (!instruction.includes(val)) instruction += ' (' + val + ')';
