@@ -33,7 +33,7 @@ npm install
 npm run dev
 ```
 
-Deploy uses the Vercel CLI (`npm run deploy` from `web/`). Configure any required secrets in your hosting project settings — do not commit them.
+Deploy with the Vercel CLI from the **repository root** (`npm run deploy`), because the linked Vercel project’s **Root Directory** is `web` (running deploy from inside `web/` would resolve `web/web`). You can also use `npm run deploy` from `web/` (it targets the parent directory). Configure any required secrets in your hosting project settings — do not commit them.
 
 ---
 

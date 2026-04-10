@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "KnitWise — interactive knitting pattern reader (web app in web/)",
+  "scripts": {
+    "deploy": "npx vercel --prod"
+  },
   "license": "ISC",
   "author": "Rohan Dharane (https://rohandharane.com)",
   "keywords": ["knitting", "patterns", "knitwise"]
