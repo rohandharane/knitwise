@@ -343,8 +343,7 @@ a { color: inherit; text-decoration: none; }
   align-items: start;
 }
 @media (max-width: 1023px) {
-  .feature-split--reverse .feature-split__media { order: 1; }
-  .feature-split--reverse .feature-split__copy { order: 2; }
+  /* Same stack for all cards: copy first, demo below (DOM order; no flex order swap). */
 
   .feature-split--cursor {
     padding-top: clamp(1.25rem, 3.8vw, 1.75rem);
@@ -385,9 +384,6 @@ a { color: inherit; text-decoration: none; }
     margin-left: 0;
     margin-right: 0;
   }
-  .feature-split--reverse .feature-split__copy {
-    padding-top: 0.15rem;
-  }
 }
 @media (min-width: 1024px) {
   .feature-split__grid {
@@ -408,23 +404,17 @@ a { color: inherit; text-decoration: none; }
     width: 100%;
     align-self: start;
   }
-  /* Demo-left / copy-right: row height follows the tall video; center copy so it
-     does not sit top-aligned with a huge gap below (align-self:start on children
-     would override a parent align-items:center). */
-  .feature-split--reverse .feature-split__grid {
-    align-items: center;
-  }
   .feature-split--reverse .feature-split__copy {
     grid-column: 17 / 25;
     grid-row: 1;
     padding-left: calc(var(--cs-g) * 3);
     padding-right: calc(var(--cs-g) * 0.25);
-    align-self: center;
+    align-self: start;
   }
   .feature-split--reverse .feature-split__media {
     grid-column: 1 / 17;
     grid-row: 1;
-    align-self: center;
+    align-self: start;
   }
 }
 .feature-split__copy {
