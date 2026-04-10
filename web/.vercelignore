@@ -1,3 +1,4 @@
 # Demo videos: served from Blob (media-cdn.json + /api/landing-demo-manifest).
-# Do not upload MP4s (Vercel 100 MB/file limit; KW DEMO.mp4 alone is ~114 MB).
+# Do not upload MP4s (Vercel 100 MB/file limit).
 public/media/**/*.mp4
+public/media/KW DEMO.mp4

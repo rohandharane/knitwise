@@ -1,3 +1,7 @@
 # Landing demos are served from Vercel Blob (see ../media-cdn.json). Do not commit
 # MP4s: deploy/upload size limits and faster git. Keep files locally for npm run upload-landing-media.
+# Unused archive (~114 MB); not referenced by the site.
+KW DEMO.mp4
+KW_DEMO.mp4
+KW_demo*.mp4
 *.mp4
