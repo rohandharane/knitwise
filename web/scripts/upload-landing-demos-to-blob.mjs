@@ -4,7 +4,8 @@
  *
  * - If media-cdn.json already maps every file to an http(s) URL, upload is skipped
  *   (set BLOB_FORCE_UPLOAD=1 to replace blobs).
- * - Without BLOB_READ_WRITE_TOKEN, skips upload; keep committed media-cdn.json or use /media/*.
+ * - Without BLOB_READ_WRITE_TOKEN, skips upload; use committed media-cdn.json (Blob URLs).
+ * - MP4s are gitignored under public/media/; run this locally with files present to refresh Blob.
  *
  * Local: npm run upload-landing-media
  * Vercel: add BLOB_READ_WRITE_TOKEN for first deploy (or run locally, commit media-cdn.json).

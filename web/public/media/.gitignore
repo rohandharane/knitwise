@@ -1,2 +1,3 @@
-# Local/archive only (~115 MB). Landing uses kw_*.mp4. GitHub blocks files over 100 MB.
-KW DEMO.mp4
+# Landing demos are served from Vercel Blob (see ../media-cdn.json). Do not commit
+# MP4s: deploy/upload size limits and faster git. Keep files locally for npm run upload-landing-media.
+*.mp4

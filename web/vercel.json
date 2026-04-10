@@ -13,9 +13,6 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/app", "destination": "/app.html" },
-    {
-      "source": "/(?!media/|media-cdn\\.json|favicon\\.svg|_vercel/|api/|app\\.html|landing\\.html)(.*)",
-      "destination": "/landing.html"
-    }
+    { "source": "/(.*)", "destination": "/landing.html" }
   ]
 }
