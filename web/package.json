@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod",
-    "test": "vitest run"
+    "test": "vitest run",
+    "upload-landing-media": "node scripts/upload-landing-demos-to-blob.mjs",
+    "vercel-build": "node scripts/upload-landing-demos-to-blob.mjs"
   },
   "devDependencies": {
+    "@vercel/blob": "^0.27.1",
     "jsdom": "^29.0.1",
     "vitest": "^4.1.2"
   }
