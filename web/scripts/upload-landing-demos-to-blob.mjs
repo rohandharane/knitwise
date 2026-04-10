@@ -7,8 +7,7 @@
  * - Without BLOB_READ_WRITE_TOKEN, skips upload; use committed media-cdn.json (Blob URLs).
  * - MP4s are gitignored under public/media/; run this locally with files present to refresh Blob.
  *
- * Local: npm run upload-landing-media
- * Vercel: add BLOB_READ_WRITE_TOKEN for first deploy (or run locally, commit media-cdn.json).
+ * Run manually when demos change: npm run upload-landing-media (not part of vercel-build).
  */
 import { put } from '@vercel/blob';
 import { readFileSync, writeFileSync, existsSync } from 'fs';

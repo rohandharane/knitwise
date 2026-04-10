@@ -9,7 +9,7 @@
     "deploy": "vercel --prod",
     "test": "vitest run",
     "upload-landing-media": "node scripts/upload-landing-demos-to-blob.mjs",
-    "vercel-build": "node scripts/upload-landing-demos-to-blob.mjs"
+    "vercel-build": "node scripts/vercel-build.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^0.27.1"
