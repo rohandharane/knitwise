@@ -3354,28 +3354,12 @@ ${badJson}`;
     return txt.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
   }
 
-  // ─── KEYBOARD HEIGHT (Capacitor plugin) ───
-  if (window.Capacitor?.Plugins?.Keyboard) {
-    const { Keyboard } = Capacitor.Plugins;
-    Keyboard.addListener('keyboardWillShow', function(info) {
-      document.documentElement.style.setProperty('--kb-height', info.keyboardHeight + 'px');
-    });
-    Keyboard.addListener('keyboardWillHide', function() {
-      document.documentElement.style.setProperty('--kb-height', '0px');
-    });
-  }
-
-  // ─── SYSTEM THEME (status bar + meta tag) ───
+  // ─── SYSTEM THEME (meta theme-color) ───
   function syncThemeColor() {
     var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     var bg = isDark ? '#1a1a1a' : '#f7f7f4';
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', bg);
-    if (window.Capacitor?.Plugins?.StatusBar) {
-      var StatusBar = Capacitor.Plugins.StatusBar;
-      StatusBar.setBackgroundColor({ color: bg }).catch(function() {});
-      StatusBar.setStyle({ style: isDark ? 'DARK' : 'LIGHT' }).catch(function() {});
-    }
   }
   syncThemeColor();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncThemeColor);

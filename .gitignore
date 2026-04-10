@@ -64,8 +64,9 @@ npm-debug.log*
 *.swo
 *~
 
-# ─── Android / Gradle (see also android/.gitignore) ───
-android/**/build/
-android/.gradle/
+# ─── Android (removed from repo; ignore local Gradle leftovers) ───
+/android/
+
+# ─── Android build artifacts ───
 *.apk
 *.aab

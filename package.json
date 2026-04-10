@@ -1,29 +1,9 @@
 {
   "name": "knitly",
   "version": "1.0.0",
-  "description": "KnitWise - Interactive knitting pattern reader",
-  "main": "index.js",
-  "scripts": {
-    "build": "echo 'Static app — no build step needed'",
-    "cap:add": "npx cap add android",
-    "cap:sync": "npx cap sync android",
-    "cap:open": "npx cap open android",
-    "cap:run": "npx cap run android",
-    "android": "npx cap sync android && npx cap open android"
-  },
-  "keywords": ["knitting", "patterns", "capacitor", "knitwise"],
-  "author": "Rohan Dharane (https://rohandharane.com)",
+  "private": true,
+  "description": "KnitWise — interactive knitting pattern reader (web app in web/)",
   "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "@capacitor/android": "^8.3.0",
-    "@capacitor/cli": "^8.3.0",
-    "@capacitor/core": "^8.3.0",
-    "@capacitor/filesystem": "^8.1.2",
-    "@capacitor/keyboard": "^8.0.2",
-    "@capacitor/status-bar": "^8.0.2"
-  },
-  "devDependencies": {
-    "typescript": "^6.0.2"
-  }
+  "author": "Rohan Dharane (https://rohandharane.com)",
+  "keywords": ["knitting", "patterns", "knitwise"]
 }

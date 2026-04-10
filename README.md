@@ -12,8 +12,8 @@ KnitWise turns knitting patterns (PDF, image, or pasted text) into guided steps.
 
 - Pattern upload or paste; structured steps for working through the pattern.
 - Row notes (web) with step tags.
-- Local storage on web and Android.
-- System appearance (light/dark) on web and in the app.
+- Local storage in the browser.
+- System appearance (light/dark).
 
 ---
 
@@ -22,9 +22,6 @@ KnitWise turns knitting patterns (PDF, image, or pasted text) into guided steps.
 | Path | Purpose |
 |------|---------|
 | `web/` | Landing site, web app, and serverless API routes. |
-| `www/` | Capacitor web bundle; synced into the Android project. |
-| `android/` | Android app (Capacitor). |
-| `capacitor.config.ts` | Capacitor configuration. |
 
 ---
 
@@ -40,13 +37,9 @@ Deploy uses the Vercel CLI (`npm run deploy` from `web/`). Configure any require
 
 ---
 
-## Android
+## Deprecated: Android / Capacitor
 
-```bash
-npm install
-npm run cap:sync
-npm run cap:open
-```
+This repository previously included a **Capacitor-wrapped Android app** (`android/`, `www/`, `capacitor.config.ts`, root Capacitor npm packages). That stack is **no longer maintained**; **KnitWise is web-only**. Use the responsive web app in the browser (including on phones). Older mobile code was removed to reduce noise; you can still recover it from Git history if needed.
 
 ---
 
