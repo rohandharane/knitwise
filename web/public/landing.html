@@ -1325,8 +1325,8 @@ a { color: inherit; text-decoration: none; }
   }
 
   function bootLandingDemos() {
-    function loadJson(url) {
-      return fetch(url, { credentials: 'same-origin' }).then(function (r) {
+    function loadJson(url, init) {
+      return fetch(url, Object.assign({ credentials: 'same-origin' }, init || {})).then(function (r) {
         if (!r.ok) return null;
         var ct = (r.headers.get('content-type') || '').toLowerCase();
         if (ct.indexOf('application/json') === -1) return null;
@@ -1334,15 +1334,28 @@ a { color: inherit; text-decoration: none; }
       });
     }
 
-    Promise.all([
-      loadJson('/media-cdn.json'),
-      loadJson('/api/landing-demo-manifest'),
-    ])
-      .then(function (pair) {
-        applyDemoCdnManifest(mergeDemoManifests(pair[0], pair[1]));
+    /* Fast path: apply /media-cdn.json then start observers immediately. The Blob list API
+       can take 15s+ or 504; waiting on it in Promise.all made the page feel broken. */
+    loadJson('/media-cdn.json')
+      .then(function (staticMap) {
+        applyDemoCdnManifest(mergeDemoManifests(staticMap, {}));
+        startLandingDemoVideos();
+
+        var ac = new AbortController();
+        var t = setTimeout(function () {
+          ac.abort();
+        }, 2800);
+        loadJson('/api/landing-demo-manifest', { signal: ac.signal })
+          .then(function (apiMap) {
+            clearTimeout(t);
+            if (!apiMap || typeof apiMap !== 'object') return;
+            applyDemoCdnManifest(mergeDemoManifests(staticMap, apiMap));
+          })
+          .catch(function () {
+            clearTimeout(t);
+          });
       })
-      .catch(function () {})
-      .finally(function () {
+      .catch(function () {
         startLandingDemoVideos();
       });
   }
