@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f4f4f0">
-<title>KnitWise — The pattern companion for knitters who keep starting over</title>
-<meta name="description" content="Knitting patterns weren't written to be followed—they were written to be deciphered. KnitWise breaks yours into steps you can actually move through.">
+<meta name="theme-color" content="#f7f7f4">
+<title>KnitWise: The pattern companion for knitters who keep starting over</title>
+<meta name="description" content="Knitting patterns weren't written to be followed. They were written to be deciphered. KnitWise breaks yours into steps you can actually move through.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,7 @@
   --ease-in-out:  cubic-bezier(0.77, 0, 0.175, 1);
   --motion-fast:  160ms;
   --motion-base:  220ms;
+  --hero-band-bg: #f7f7f4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,6 +50,7 @@
     --nav-border:    rgba(255,255,255,0.08);
     --nav-shadow:    0 25px 50px -12px rgba(0,0,0,0.4);
     --label-color:   #8a8a7e;
+    --hero-band-bg: var(--bg);
   }
 }
 
@@ -70,6 +72,11 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
+
+/* ─── TOP (nav + hero): matches feature strip ─── */
+.hero-band {
+  background-color: var(--hero-band-bg);
+}
 
 /* ─── FLOATING NAV ─── */
 .nav-wrap {
@@ -99,12 +106,18 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 12px 40px -8px rgba(0,0,0,0.08);
 }
 .nav-logo {
+  display: inline-block;
   font-family: var(--font-display);
   font-size: 20px;
   letter-spacing: -0.5px;
   line-height: 28px;
   color: var(--text);
   padding-left: 8px;
+  transition: transform var(--motion-fast) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+}
+.nav-logo:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .nav-logo:hover { opacity: 0.88; }
 }
 .nav-cta {
   display: inline-flex;
@@ -227,7 +240,7 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-color-scheme: dark) {
   .hero-link-why { background: rgba(255,255,255,0.04); }
 }
-.hero-link-why:active { transform: scale(0.98); }
+.hero-link-why:active { transform: scale(0.97); }
 @media (hover: hover) and (pointer: fine) {
   .hero-link-why:hover {
     color: var(--text-body);
@@ -235,29 +248,242 @@ a { color: inherit; text-decoration: none; }
   }
 }
 
-/* ─── HERO VISUAL ─── */
-.hero-visual-wrap {
-  margin: 64px auto 0;
-  max-width: 920px;
-  padding: 0 24px;
-}
-.hero-visual-wrap img {
+/* ─── FEATURE DEMO VIDEO (16:9, used inside Cursor-layout cards) ─── */
+.demo-desktop {
+  position: relative;
+  aspect-ratio: 16 / 9;
   width: 100%;
-  height: auto;
-  border-radius: 16px;
-  box-shadow: 0 32px 80px -20px rgba(0,0,0,0.12), 0 0 0 1px var(--border-card);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.demo-desktop video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
+  border-radius: 12px;
+  /* Browsers default video letterbox to black; match landing canvas */
+  background-color: var(--bg);
 }
-.hero-visual-wrap.placeholder {
-  min-height: 280px;
+
+/* Placeholder icon shown when no video has loaded */
+.demo-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-faint);
+  z-index: 1;
+  transition: opacity var(--motion-base) var(--ease-out);
 }
-.hero-visual-wrap.placeholder::after {
+.demo-placeholder svg {
+  opacity: 0.35;
+}
+.demo-placeholder span {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  opacity: 0.5;
+}
+/* Hide placeholder once video is playing */
+.demo-desktop.playing .demo-placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── FEATURE SPLIT (matches cursor.com/home product cards, tokens from their CSS) ─── */
+.feature-showcase {
+  scroll-margin-top: 88px;
+}
+.feature-split--cursor {
+  --cs-g: calc(10rem / 16);
+  --cs-bg: #f7f7f4;
+  --cs-card: #f2f1ed;
+  --cs-media-bg: #d9d5cf;
+  --cs-border-01: rgba(38, 37, 30, 0.06);
+  background: var(--cs-bg);
+  padding: calc(1.4rem * 3) 0;
+}
+.feature-split--cursor + .feature-split--cursor {
+  padding-top: calc(1.4rem * 1.5);
+}
+@media (prefers-color-scheme: dark) {
+  .feature-split--cursor {
+    --cs-bg: #14120b;
+    --cs-card: #1b1913;
+    --cs-media-bg: #4a443b;
+    --cs-border-01: rgba(237, 236, 236, 0.08);
+  }
+}
+.feature-split__container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 calc(var(--cs-g) * 2);
+}
+.feature-split__card {
+  background: var(--cs-card);
+  border-radius: 4px;
+  padding: calc(var(--cs-g) * 1.5 - 0.1rem) calc(var(--cs-g) * 1.5);
+}
+@media (min-width: 420px) {
+  .feature-split__card {
+    padding: calc(var(--cs-g) * 1.75);
+  }
+}
+.feature-split__grid {
+  display: grid;
+  gap: calc(var(--cs-g) * 1.75);
+  align-items: start;
+}
+@media (max-width: 1023px) {
+  .feature-split--reverse .feature-split__media { order: 1; }
+  .feature-split--reverse .feature-split__copy { order: 2; }
+}
+@media (min-width: 1024px) {
+  .feature-split__grid {
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+    gap: var(--cs-g);
+    align-items: start;
+  }
+  .feature-split__copy {
+    grid-column: 1 / 9;
+    padding-left: calc(var(--cs-g) * 0.25);
+    padding-right: calc(var(--cs-g) * 3);
+    min-width: 0;
+    align-self: start;
+  }
+  .feature-split__media {
+    grid-column: 9 / 25;
+    min-width: 0;
+    width: 100%;
+    align-self: start;
+  }
+  /* Demo-left / copy-right: row height follows the tall video; center copy so it
+     does not sit top-aligned with a huge gap below (align-self:start on children
+     would override a parent align-items:center). */
+  .feature-split--reverse .feature-split__grid {
+    align-items: center;
+  }
+  .feature-split--reverse .feature-split__copy {
+    grid-column: 17 / 25;
+    grid-row: 1;
+    padding-left: calc(var(--cs-g) * 3);
+    padding-right: calc(var(--cs-g) * 0.25);
+    align-self: center;
+  }
+  .feature-split--reverse .feature-split__media {
+    grid-column: 1 / 17;
+    grid-row: 1;
+    align-self: center;
+  }
+}
+.feature-split__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 65ch;
+}
+.feature-split__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+.feature-split__lede {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--text-muted);
+  text-wrap: balance;
+  max-width: 38ch;
+}
+@media (min-width: 768px) {
+  .feature-split__lede {
+    font-size: 1.0625rem;
+  }
+}
+.feature-split__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  margin-top: calc(1.4rem * 8 / 12);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-faint);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(12, 12, 9, 0.12);
+  text-underline-offset: 3px;
+  transition: color var(--motion-fast) var(--ease-out), text-decoration-color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+}
+.feature-split__cta:active { transform: scale(0.97); }
+@media (prefers-color-scheme: dark) {
+  .feature-split__cta {
+    text-decoration-color: rgba(244, 244, 240, 0.14);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .feature-split__cta:hover {
+    color: var(--text-muted);
+    text-decoration-color: rgba(12, 12, 9, 0.22);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-color-scheme: dark) {
+  .feature-split__cta:hover {
+    text-decoration-color: rgba(244, 244, 240, 0.28);
+  }
+}
+/* media-border-container pattern */
+.feature-split__media-border {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--cs-media-bg);
+}
+.feature-split__media-border::after {
   content: '';
-  display: block;
-  aspect-ratio: 16/10;
-  border-radius: 16px;
-  background: linear-gradient(145deg, var(--icon-tile) 0%, var(--surface) 50%, var(--border-card) 100%);
-  box-shadow: inset 0 0 0 1px var(--border-card);
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  border: 1px solid var(--cs-border-01);
+  pointer-events: none;
+  z-index: 30;
+}
+.feature-split--cursor .demo-desktop {
+  border-radius: 4px;
+  background: var(--cs-media-bg);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+.feature-split--cursor .demo-desktop video {
+  border-radius: 4px;
+  background-color: var(--cs-media-bg);
+}
+.feature-split--cursor .demo-desktop::after {
+  display: none;
 }
 
 /* ─── DIVIDER ─── */
@@ -357,6 +583,27 @@ a { color: inherit; text-decoration: none; }
   .feature-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 20px 48px -16px rgba(0,0,0,0.08);
+  }
+}
+@media (prefers-color-scheme: dark) {
+  @media (hover: hover) and (pointer: fine) {
+    .feature-card:hover {
+      box-shadow: 0 20px 48px -16px rgba(0,0,0,0.45);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feature-card {
+    transition: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .feature-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+  .demo-placeholder {
+    transition: opacity 100ms var(--ease-out);
   }
 }
 .feature-card .icon-tile {
@@ -459,7 +706,10 @@ a { color: inherit; text-decoration: none; }
   text-decoration: underline;
   text-decoration-color: rgba(0,0,0,0.15);
   text-underline-offset: 3px;
-  transition: color var(--motion-fast) var(--ease-out), text-decoration-color var(--motion-fast) var(--ease-out);
+  transition: color var(--motion-fast) var(--ease-out), text-decoration-color var(--motion-fast) var(--ease-out), opacity var(--motion-fast) var(--ease-out);
+}
+.footer-meta a.footer-credit:active {
+  opacity: 0.88;
 }
 @media (prefers-color-scheme: dark) {
   .footer-meta a.footer-credit {
@@ -477,7 +727,7 @@ a { color: inherit; text-decoration: none; }
   opacity: 0.35;
 }
 
-/* ─── REDUCED MOTION: skip everything, show immediately ─── */
+/* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
@@ -485,38 +735,198 @@ a { color: inherit; text-decoration: none; }
 </head>
 <body>
 
-<div class="nav-wrap">
-  <nav class="nav-pill" id="navPill" aria-label="Primary">
-    <a href="/" class="nav-logo">KnitWise</a>
-    <a href="/app" class="nav-cta">Try it <span>&rarr;</span></a>
-  </nav>
+<div class="hero-band">
+  <div class="nav-wrap">
+    <nav class="nav-pill" id="navPill" aria-label="Primary">
+      <a href="/" class="nav-logo">KnitWise</a>
+      <a href="/app" class="nav-cta">Jump into the app <span>&rarr;</span></a>
+    </nav>
+  </div>
+
+  <!-- ───────── HERO ───────── -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <h1 id="hero-heading" class="hero-headline">
+      knit further.<br>
+      <span class="muted">the pattern companion for<br>knitters who keep starting over.</span>
+    </h1>
+    <p class="hero-sub">
+      Knitting patterns weren't written to be followed. They were written to be deciphered.
+      <em>KnitWise</em> breaks yours into steps you can actually move through, one at a time.
+    </p>
+    <div class="hero-actions">
+      <a href="/app" class="btn-primary">Try without signing up <span class="arrow">&rarr;</span></a>
+    </div>
+  </section>
 </div>
 
-<!-- ───────── HERO ───────── -->
-<section class="hero" aria-labelledby="hero-heading">
-  <h1 id="hero-heading" class="hero-headline">
-    knit further.<br>
-    <span class="muted">the pattern companion for<br>knitters who keep starting over.</span>
-  </h1>
-  <p class="hero-sub">
-    Knitting patterns weren't written to be followed—they were written to be deciphered.
-    <em>KnitWise</em> breaks yours into steps you can actually move through, one at a time.
-  </p>
-  <div class="hero-actions">
-    <a href="/app" class="btn-primary">Try it, no account needed <span class="arrow">&rarr;</span></a>
+<div class="feature-showcase" id="feature-showcase">
+<!-- 1 · Bring the pattern in -->
+<section class="feature-split--cursor" aria-labelledby="feat-upload-title">
+  <div class="feature-split__container">
+    <div class="feature-split__card">
+      <div class="feature-split__grid">
+        <div class="feature-split__copy">
+          <h2 id="feat-upload-title" class="feature-split__title" data-scroll>Bring your pattern in: PDF, photo, or paste.</h2>
+          <p class="feature-split__lede" data-scroll>Drop a file or paste the text. KnitWise reads it and turns it into something you can follow, instead of something you have to decode.</p>
+          <a href="/app" class="feature-split__cta" data-scroll>Import a pattern</a>
+        </div>
+        <div class="feature-split__media" data-scroll>
+          <div class="feature-split__media-border">
+            <div class="demo-desktop">
+              <video class="demo-video" playsinline muted loop preload="none" aria-label="Uploading a pattern and parsing in KnitWise">
+                <source src="/media/kw_upload_parse.mp4" type="video/mp4">
+              </video>
+              <div class="demo-placeholder" aria-hidden="true">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6"/></svg>
+                <span>Loading demo…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<div class="hero-visual-wrap">
-  <img
-    src="https://www.figma.com/api/mcp/asset/beacc909-3f07-4dfd-a77b-2ef3812596c6"
-    alt="KnitWise app showing a pattern step with glossary tooltip"
-    width="921"
-    height="691"
-    loading="eager"
-    decoding="async"
-    onerror="this.style.display='none'; this.parentElement.classList.add('placeholder')"
-  />
+<!-- 2 · Steps + glossary -->
+<section class="feature-split--cursor feature-split--reverse" aria-labelledby="feat-steps-title">
+  <div class="feature-split__container">
+    <div class="feature-split__card">
+      <div class="feature-split__grid">
+        <div class="feature-split__copy">
+          <h2 id="feat-steps-title" class="feature-split__title" data-scroll>One step at a time, with the glossary right there.</h2>
+          <p class="feature-split__lede" data-scroll>Move through rows in order. When a stitch or abbreviation stumps you, tap it and keep your place, no tab-hopping to search the web.</p>
+          <a href="/app" class="feature-split__cta" data-scroll>Walk through steps</a>
+        </div>
+        <div class="feature-split__media" data-scroll>
+          <div class="feature-split__media-border">
+            <div class="demo-desktop">
+              <video class="demo-video" playsinline muted loop preload="none" aria-label="Step list and glossary in KnitWise">
+                <source src="/media/kw_steps_glossary.mp4" type="video/mp4">
+              </video>
+              <div class="demo-placeholder" aria-hidden="true">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6"/></svg>
+                <span>Loading demo…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Sizing -->
+<section class="feature-split--cursor" aria-labelledby="feat-size-title">
+  <div class="feature-split__container">
+    <div class="feature-split__card">
+      <div class="feature-split__grid">
+        <div class="feature-split__copy">
+          <h2 id="feat-size-title" class="feature-split__title" data-scroll>Pick your size first, then every step matches.</h2>
+          <p class="feature-split__lede" data-scroll>When a pattern lists multiple sizes, choose yours up front so instructions and numbers line up with what you’re actually knitting.</p>
+          <a href="/app" class="feature-split__cta" data-scroll>Set your size</a>
+        </div>
+        <div class="feature-split__media" data-scroll>
+          <div class="feature-split__media-border">
+            <div class="demo-desktop">
+              <video class="demo-video" playsinline muted loop preload="none" aria-label="Size selector in KnitWise">
+                <source src="/media/kw_sizing.mp4" type="video/mp4">
+              </video>
+              <div class="demo-placeholder" aria-hidden="true">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6"/></svg>
+                <span>Loading demo…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Repeats -->
+<section class="feature-split--cursor feature-split--reverse" aria-labelledby="feat-repeat-title">
+  <div class="feature-split__container">
+    <div class="feature-split__card">
+      <div class="feature-split__grid">
+        <div class="feature-split__copy">
+          <h2 id="feat-repeat-title" class="feature-split__title" data-scroll>Repeats, made legible.</h2>
+          <p class="feature-split__lede" data-scroll>“Repeat from * to *” and similar directions get structured so you know what to do next, without losing count in a wall of text.</p>
+          <a href="/app" class="feature-split__cta" data-scroll>See how repeats work</a>
+        </div>
+        <div class="feature-split__media" data-scroll>
+          <div class="feature-split__media-border">
+            <div class="demo-desktop">
+              <video class="demo-video" playsinline muted loop preload="none" aria-label="Repeat instructions in KnitWise">
+                <source src="/media/kw_repeats.mp4" type="video/mp4">
+              </video>
+              <div class="demo-placeholder" aria-hidden="true">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6"/></svg>
+                <span>Loading demo…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Reference images -->
+<section class="feature-split--cursor" aria-labelledby="feat-ref-title">
+  <div class="feature-split__container">
+    <div class="feature-split__card">
+      <div class="feature-split__grid">
+        <div class="feature-split__copy">
+          <h2 id="feat-ref-title" class="feature-split__title" data-scroll>Charts and photos from the pattern, on demand.</h2>
+          <p class="feature-split__lede" data-scroll>Browse reference images that came with your pattern (diagrams, schematics, or photos) while you stay in the step you’re working.</p>
+          <a href="/app" class="feature-split__cta" data-scroll>Flip through references</a>
+        </div>
+        <div class="feature-split__media" data-scroll>
+          <div class="feature-split__media-border">
+            <div class="demo-desktop">
+              <video class="demo-video" playsinline muted loop preload="none" aria-label="Reference images from pattern in KnitWise">
+                <source src="/media/kw_reference_images.mp4" type="video/mp4">
+              </video>
+              <div class="demo-placeholder" aria-hidden="true">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6"/></svg>
+                <span>Loading demo…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Notes -->
+<section class="feature-split--cursor feature-split--reverse" aria-labelledby="feat-notes-title">
+  <div class="feature-split__container">
+    <div class="feature-split__card">
+      <div class="feature-split__grid">
+        <div class="feature-split__copy">
+          <h2 id="feat-notes-title" class="feature-split__title" data-scroll>Notes that stay with the step.</h2>
+          <p class="feature-split__lede" data-scroll>Jot counts, reminders, or yarn changes on the row where they matter, so when you come back, the context is still there.</p>
+          <a href="/app" class="feature-split__cta" data-scroll>Add a row note</a>
+        </div>
+        <div class="feature-split__media" data-scroll>
+          <div class="feature-split__media-border">
+            <div class="demo-desktop">
+              <video class="demo-video" playsinline muted loop preload="none" aria-label="Notes on a step in KnitWise">
+                <source src="/media/kw_notes.mp4" type="video/mp4">
+              </video>
+              <div class="demo-placeholder" aria-hidden="true">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6"/></svg>
+                <span>Loading demo…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 </div>
 
 <div class="section-divider"></div>
@@ -546,28 +956,28 @@ a { color: inherit; text-decoration: none; }
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
       </div>
       <h3>Glossary built in</h3>
-      <p>Tap an abbreviation or stitch name—get a plain-English explanation without losing your row.</p>
+      <p>Tap an abbreviation or stitch name: get a plain-English explanation without losing your row.</p>
     </article>
     <article class="feature-card">
       <div class="icon-tile" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M4 12h12M4 18h16"/></svg>
       </div>
       <h3>Notes per step</h3>
-      <p>Row notes that follow your pattern from step to step—no more sticky notes on the arm of the couch.</p>
+      <p>Row notes that follow your pattern from step to step. No more sticky notes on the arm of the couch.</p>
     </article>
     <article class="feature-card">
       <div class="icon-tile" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h14v16l-7-4-7 4V4z"/></svg>
       </div>
       <h3>Saves your place</h3>
-      <p>Close the tab or the app. Your progress and notes are still there—stored locally on your device.</p>
+      <p>Close the tab or the app. Your progress and notes are still there, stored locally on your device.</p>
     </article>
     <article class="feature-card">
       <div class="icon-tile" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 17h.01"/></svg>
       </div>
       <h3>Works on your phone</h3>
-      <p>Android app plus this web version—keep the pattern on screen while your hands stay on the needles.</p>
+      <p>Android app plus this web version: keep the pattern on screen while your hands stay on the needles.</p>
     </article>
     <article class="feature-card">
       <div class="icon-tile" aria-hidden="true">
@@ -581,7 +991,7 @@ a { color: inherit; text-decoration: none; }
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h10M4 18h14"/></svg>
       </div>
       <h3>Multiple sizes</h3>
-      <p>When a pattern lists sizes, pick yours first—so every step matches the version you're actually knitting.</p>
+      <p>When a pattern lists sizes, pick yours first, so every step matches the version you're actually knitting.</p>
     </article>
   </div>
 </section>
@@ -592,14 +1002,14 @@ a { color: inherit; text-decoration: none; }
 <section class="final-cta">
   <span class="section-label" data-scroll>get started</span>
   <h2 data-scroll>Ready to stop losing your place?</h2>
-  <a href="/app" class="btn-primary" data-scroll>Open KnitWise <span class="arrow">&rarr;</span></a>
+  <a href="/app" class="btn-primary" data-scroll>Resume where you left off <span class="arrow">&rarr;</span></a>
 </section>
 
 <!-- ───────── FOOTER ───────── -->
 <footer class="footer-zone">
   <p class="footer-tagline" id="footerTagline">Made for knitters.</p>
   <div class="footer-watermark" id="footerMark" aria-hidden="true">KnitWise</div>
-  <p class="footer-beta"><span class="footer-beta-pill">Beta — open to feedback</span></p>
+  <p class="footer-beta"><span class="footer-beta-pill">Beta, open to feedback</span></p>
   <p class="footer-meta">
     <span class="footer-domain">knitwise.xyz</span>
     <span class="footer-meta-sep" aria-hidden="true">·</span>
@@ -623,40 +1033,35 @@ a { color: inherit; text-decoration: none; }
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  gsap.defaults({ ease: 'power3.out', force3D: true });
+  /* power2.out: responsive first movement; scroll UI durations ~280–320ms */
+  gsap.defaults({ ease: 'power2.out', force3D: true });
 
-  // ── Hero entrance (~0.9s total) ──
+  // ── Hero entrance (first paint, slightly longer, still snappy) ──
 
   var tl = gsap.timeline();
 
   tl.fromTo('.nav-wrap',
     { opacity: 0 },
-    { opacity: 1, duration: 0.45 },
+    { opacity: 1, duration: 0.38 },
     0
   );
 
   tl.fromTo('.hero-headline',
-    { opacity: 0, y: 10 },
-    { opacity: 1, y: 0, duration: 0.65 },
+    { opacity: 0, y: 8 },
+    { opacity: 1, y: 0, duration: 0.52 },
     0.04
   );
 
   tl.fromTo('.hero-sub',
-    { opacity: 0, y: 8 },
-    { opacity: 1, y: 0, duration: 0.55 },
-    0.18
+    { opacity: 0, y: 6 },
+    { opacity: 1, y: 0, duration: 0.42 },
+    0.14
   );
 
   tl.fromTo('.hero-actions',
-    { opacity: 0, y: 6 },
-    { opacity: 1, y: 0, duration: 0.45 },
-    0.3
-  );
-
-  tl.fromTo('.hero-visual-wrap',
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.8 },
-    0.22
+    { opacity: 0, y: 5 },
+    { opacity: 1, y: 0, duration: 0.36 },
+    0.24
   );
 
   // ── Scroll reveals ──
@@ -665,8 +1070,24 @@ a { color: inherit; text-decoration: none; }
     gsap.fromTo(el,
       { scaleY: 0, opacity: 0 },
       {
-        scaleY: 1, opacity: 1, duration: 0.55,
+        scaleY: 1, opacity: 1, duration: 0.36,
         scrollTrigger: { trigger: el, start: 'top 90%', once: true }
+      }
+    );
+  });
+
+  gsap.utils.toArray('.feature-split__grid').forEach(function (grid) {
+    var els = grid.querySelectorAll('[data-scroll]');
+    if (!els.length) return;
+    gsap.fromTo(els,
+      { opacity: 0, y: 10 },
+      {
+        opacity: 1, y: 0, duration: 0.3, stagger: 0.06,
+        scrollTrigger: { trigger: grid, start: 'top 86%', once: true },
+        onComplete: function () {
+          grid.setAttribute('data-feature-revealed', 'true');
+          grid.dispatchEvent(new CustomEvent('knitwise:feature-reveal-done', { bubbles: false }));
+        }
       }
     );
   });
@@ -675,9 +1096,9 @@ a { color: inherit; text-decoration: none; }
     var els = document.querySelectorAll(sel + ' [data-scroll]');
     if (!els.length) return;
     gsap.fromTo(els,
-      { opacity: 0, y: 12 },
+      { opacity: 0, y: 10 },
       {
-        opacity: 1, y: 0, duration: 0.5, stagger: 0.07,
+        opacity: 1, y: 0, duration: 0.3, stagger: 0.06,
         scrollTrigger: { trigger: els[0], start: 'top 86%', once: true }
       }
     );
@@ -688,8 +1109,8 @@ a { color: inherit; text-decoration: none; }
     once: true,
     onEnter: function (batch) {
       gsap.fromTo(batch,
-        { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.05 }
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.28, stagger: 0.045 }
       );
     }
   });
@@ -702,28 +1123,123 @@ a { color: inherit; text-decoration: none; }
 
   ft.fromTo('.footer-tagline',
     { opacity: 0 },
-    { opacity: 1, duration: 0.45 },
+    { opacity: 1, duration: 0.36 },
     0
   );
 
   ft.fromTo('.footer-watermark',
-    { opacity: 0, y: 12 },
-    { opacity: 1, y: 0, duration: 0.7 },
-    0.05
+    { opacity: 0, y: 8 },
+    { opacity: 1, y: 0, duration: 0.48 },
+    0.04
   );
 
   ft.fromTo('.footer-beta',
-    { opacity: 0, y: 8 },
-    { opacity: 1, y: 0, duration: 0.45 },
-    0.12
+    { opacity: 0, y: 6 },
+    { opacity: 1, y: 0, duration: 0.32 },
+    0.1
   );
 
   ft.fromTo('.footer-meta',
     { opacity: 0 },
-    { opacity: 1, duration: 0.35 },
-    0.18
+    { opacity: 1, duration: 0.28 },
+    0.14
   );
 
+})();
+</script>
+<script>
+(function () {
+  function initLoopVideo(frame, vid) {
+    if (!frame || !vid) return;
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var grid = frame.closest('.feature-split__grid');
+    var inView = false;
+    var revealed = grid ? grid.getAttribute('data-feature-revealed') === 'true' : true;
+
+    vid.addEventListener('error', function () {
+      frame.classList.remove('playing');
+    });
+
+    if (reduceMotion) {
+      vid.removeAttribute('loop');
+      vid.setAttribute('preload', 'auto');
+      function showStillFrame() {
+        vid.pause();
+        try { vid.currentTime = 0; } catch (e) {}
+        frame.classList.add('playing');
+      }
+      if (vid.readyState >= 2) {
+        showStillFrame();
+      } else {
+        vid.addEventListener('loadeddata', function onceRm() {
+          vid.removeEventListener('loadeddata', onceRm);
+          showStillFrame();
+        });
+      }
+      return;
+    }
+
+    function reveal() {
+      frame.classList.add('playing');
+    }
+    vid.addEventListener('loadeddata', reveal);
+    vid.addEventListener('playing', reveal);
+
+    function tryPlay() {
+      if (!inView || !revealed) return;
+      try {
+        vid.preload = 'auto';
+        if (vid.readyState < 2) vid.load();
+      } catch (e) {}
+      var playP = vid.play();
+      if (playP && playP.catch) playP.catch(function () {});
+    }
+
+    function onRevealDone() {
+      revealed = true;
+      tryPlay();
+    }
+
+    if (grid) {
+      grid.addEventListener('knitwise:feature-reveal-done', onRevealDone);
+    }
+
+    function syncRevealedFromDom() {
+      if (grid && grid.getAttribute('data-feature-revealed') === 'true') {
+        revealed = true;
+      }
+    }
+    syncRevealedFromDom();
+
+    function tryPlayIfReady() {
+      syncRevealedFromDom();
+      tryPlay();
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      revealed = true;
+      inView = true;
+      tryPlay();
+      return;
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        inView = e.isIntersecting;
+        if (!inView) {
+          try { vid.pause(); } catch (err) {}
+          return;
+        }
+        tryPlayIfReady();
+      });
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0 });
+
+    io.observe(frame);
+  }
+
+  document.querySelectorAll('.feature-split--cursor .demo-desktop').forEach(function (frame) {
+    initLoopVideo(frame, frame.querySelector('video'));
+  });
 })();
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
