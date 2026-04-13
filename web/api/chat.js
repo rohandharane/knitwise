@@ -1,5 +1,4 @@
-/** Node runtime: avoids Edge bundle conflicts with other /api deps and matches Anthropic fetch usage. */
-export const config = { runtime: 'nodejs', maxDuration: 60 };
+export const config = { maxDuration: 60 };
 
 const rateLimitMap = new Map();
 
