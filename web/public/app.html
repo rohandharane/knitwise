@@ -1581,51 +1581,42 @@ button {
 /* ─────────────────────────────────────────
    ROW COUNTER FAB
 ───────────────────────────────────────── */
-.rc-fab {
-  position: fixed;
-  bottom: calc(112px + var(--safe-bottom));
-  right: 20px;
-  z-index: 200;
+/* ── Counter button in step nav ── */
+.nav-counter {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 7px;
-  padding: 10px 18px;
-  border-radius: 1000px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 510;
-  color: var(--text-2);
-  background: var(--glass-bg-heavy);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 0.5px solid var(--glass-border);
-  box-shadow: 0 4px 24px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
-  animation: fabIn 220ms var(--ease-out) both;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 14px;
+  height: 52px;
+  flex-shrink: 0;
+  min-width: 56px;
+  transition: transform 100ms var(--ease-out), background 100ms var(--ease-out);
 }
-@keyframes fabIn {
-  from { opacity: 0; transform: scale(0.9) translateY(8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.rc-fab-badge {
+.nav-counter:active { transform: scale(0.93); }
+.nav-counter-label {
   font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--accent);
-  letter-spacing: 0.04em;
-}
-/* Separator dot before badge when it has content */
-.rc-fab-badge:not(:empty)::before {
-  content: ' · ';
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--text-3);
-  font-family: var(--font-body);
+  line-height: 1;
+  user-select: none;
 }
-.rc-fab:active { transform: scale(0.94); }
+.nav-counter-num {
+  font-family: 'Sometype Mono', monospace;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  min-width: 2ch;
+  text-align: center;
+  user-select: none;
+}
 @media (hover: hover) and (pointer: fine) {
-  .rc-fab:hover { box-shadow: 0 6px 32px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rc-fab { animation: none; }
+  .nav-counter:hover .nav-counter-num { color: var(--accent); }
 }
 
 /* ─────────────────────────────────────────
@@ -1675,15 +1666,13 @@ button {
 @media (hover: hover) and (pointer: fine) {
   .rc-back-btn:hover { background: rgba(255,168,29,0.08); }
 }
-.rc-pin-toggle {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px; border-radius: 1000px;
-  font-family: var(--font-body); font-size: 13px; font-weight: 510;
+.rc-screen-title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 510;
   color: var(--text-2);
-  transition: transform var(--motion-fast) var(--ease-out);
+  letter-spacing: 0.01em;
 }
-.rc-pin-toggle.pinned { color: var(--accent); }
-.rc-pin-toggle:active { transform: scale(0.95); }
 
 /* Counter card (the white inset panel) */
 .rc-card {
@@ -1814,93 +1803,6 @@ button {
   }
 }
 
-/* ── Pinned counter pill (inside step screen) ── */
-.rc-pin-bar {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  padding: 6px 20px 4px;
-}
-
-/* Glass pill container */
-.rc-pill {
-  display: inline-flex;
-  align-items: stretch;
-  background: var(--glass-bg-heavy);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 1000px;
-  border: 0.5px solid var(--glass-border);
-  box-shadow: 0 2px 20px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
-  overflow: hidden;
-}
-
-/* Left half: "Row 12" — tap to open full counter */
-.rc-pill-info {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0 14px 0 18px;
-  height: 42px;
-  cursor: pointer;
-  border-right: 0.5px solid var(--glass-border);
-  -webkit-tap-highlight-color: transparent;
-  transition: background 100ms var(--ease-out);
-}
-.rc-pill-info:active { background: rgba(255,255,255,0.08); }
-@media (prefers-color-scheme: dark) {
-  .rc-pill-info:active { background: rgba(255,255,255,0.06); }
-}
-@media (hover: hover) and (pointer: fine) {
-  .rc-pill-info:hover { background: rgba(0,0,0,0.04); }
-  @media (prefers-color-scheme: dark) {
-    .rc-pill-info:hover { background: rgba(255,255,255,0.04); }
-  }
-}
-
-.rc-pin-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  user-select: none;
-}
-.rc-pin-num {
-  font-family: 'Sometype Mono', monospace;
-  font-size: 20px;
-  line-height: 1;
-  color: var(--text);
-  letter-spacing: -0.02em;
-  min-width: 2ch;
-  text-align: center;
-  user-select: none;
-  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1), opacity 100ms;
-}
-
-/* Right half: "+" — tap to increment */
-.rc-pill-plus {
-  width: 54px;
-  height: 42px;
-  font-size: 24px;
-  font-weight: 300;
-  line-height: 1;
-  color: var(--text);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 80ms var(--ease-out), transform 80ms var(--ease-out);
-  user-select: none;
-}
-.rc-pill-plus:active {
-  background: rgba(255, 168, 29, 0.18);
-  transform: scale(0.88);
-}
-@media (hover: hover) and (pointer: fine) {
-  .rc-pill-plus:hover { background: rgba(255,168,29,0.08); }
-}
 
 @media (min-width: 768px) {
   #screen-rowcount { padding: 24px; }
@@ -2043,20 +1945,14 @@ button {
     <button class="ref-lightbox-close" id="ref-lightbox-close" aria-label="Close">&#215;</button>
     <img id="ref-lightbox-img" src="" alt="Pattern reference page">
   </div>
-  <!-- Pinned row counter pill (shown when counter is pinned) -->
-  <div class="rc-pin-bar" id="rc-pin-bar" style="display:none">
-    <div class="rc-pill">
-      <button class="rc-pill-info" id="rc-pin-open-btn" aria-label="Open counter">
-        <span class="rc-pin-label">Row</span>
-        <span class="rc-pin-num" id="rc-pin-num">0</span>
-      </button>
-      <button class="rc-pill-plus" id="rc-pin-count-btn" aria-label="+1">+</button>
-    </div>
-  </div>
   <div class="step-nav">
     <button class="btn-glass nav-prev" id="nav-prev" disabled>&#8592;</button>
     <button class="btn-glass nav-notes" id="nav-notes">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+    </button>
+    <button class="btn-glass nav-counter" id="nav-counter" aria-label="Open row counter">
+      <span class="nav-counter-label">Row</span>
+      <span class="nav-counter-num" id="nav-counter-num">0</span>
     </button>
     <button class="btn-glass btn-glass-amber nav-next" id="nav-next">Next Step</button>
   </div>
@@ -2122,10 +2018,7 @@ button {
       <div class="rc-grabber"></div>
       <div class="rc-title-row">
         <button class="rc-back-btn" id="rc-back">&#8592; Steps</button>
-        <button class="btn-glass rc-pin-toggle" id="rc-pin-toggle">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
-          <span id="rc-pin-label">Pin to Steps</span>
-        </button>
+        <span class="rc-screen-title">Counter</span>
       </div>
     </div>
     <div class="rc-card">
@@ -2142,10 +2035,6 @@ button {
   </div>
 </div>
 
-<!-- ── ROW COUNTER FAB ── -->
-<button class="rc-fab" id="rc-fab" aria-label="Open row counter" style="display:none">
-  Counter<span class="rc-fab-badge" id="rc-fab-badge"></span>
-</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script type="module">
@@ -2422,20 +2311,6 @@ EXAMPLE — Output steps (abbreviated):
       { duration: 180, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }
     );
     if (name === 'home') renderHome();
-    if (name === 'step') {
-      rcSyncPinUI();
-      // Animate the pill in whenever the step screen becomes active
-      var pinBar = $('rc-pin-bar');
-      if (pinBar && rcPinned) {
-        pinBar.animate(
-          [{ opacity: 0, transform: 'scale(0.88) translateY(8px)' },
-           { opacity: 1, transform: 'scale(1) translateY(0)' }],
-          { duration: 260, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }
-        );
-      }
-    }
-    var fab = $('rc-fab');
-    if (fab && name !== 'step') fab.style.display = 'none';
   }
 
   // ─── HOME / LIBRARY ───
@@ -3755,19 +3630,16 @@ ${badJson}`;
 
   // ─── ROW COUNTER ───
   var rcCount = 0;
-  var rcPinned = false;
 
   function rcLoad() {
     try {
       rcCount = parseInt(localStorage.getItem('kw_rc_count') || '0', 10) || 0;
-      rcPinned = localStorage.getItem('kw_rc_pinned') === '1';
     } catch(e) {}
   }
 
   function rcSave() {
     try {
       localStorage.setItem('kw_rc_count', rcCount);
-      localStorage.setItem('kw_rc_pinned', rcPinned ? '1' : '0');
     } catch(e) {}
   }
 
@@ -3804,21 +3676,17 @@ ${badJson}`;
     rcSetDigit('rc-cell-0', 'rc-d0', d0, animate && d0 !== prev.d0);
     rcUpdateDisplay._prev = { d2: d2, d1: d1, d0: d0 };
 
-    // Pinned bar — update number + micro-bounce on increment
-    var pinNum = $('rc-pin-num');
-    if (pinNum) {
-      pinNum.textContent = n;
+    // Nav counter button — micro-bounce on increment
+    var navNum = $('nav-counter-num');
+    if (navNum) {
+      navNum.textContent = n;
       if (animate) {
-        pinNum.animate(
-          [{ transform: 'scale(1.35)', opacity: 0.6 }, { transform: 'scale(1)', opacity: 1 }],
-          { duration: 200, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
+        navNum.animate(
+          [{ transform: 'scale(1.4)', opacity: 0.5 }, { transform: 'scale(1)', opacity: 1 }],
+          { duration: 220, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'forwards' }
         );
       }
     }
-
-    // FAB badge
-    var badge = $('rc-fab-badge');
-    if (badge) badge.textContent = n > 0 ? n : '';
   }
 
   function rcIncrement() {
@@ -3838,40 +3706,16 @@ ${badJson}`;
   function rcOpenScreen() {
     showScreen('rowcount');
     rcUpdateDisplay(false);
-    rcSyncPinUI();
   }
 
   function rcCloseScreen() {
     showScreen('step');
   }
 
-  function rcSyncPinUI() {
-    var toggle = $('rc-pin-toggle');
-    var label = $('rc-pin-label');
-    if (!toggle || !label) return;
-    toggle.classList.toggle('pinned', rcPinned);
-    label.textContent = rcPinned ? 'Pinned' : 'Pin to Steps';
-
-    var pinBar = $('rc-pin-bar');
-    if (pinBar) pinBar.style.display = rcPinned ? 'flex' : 'none';
-
-    var fab = $('rc-fab');
-    if (fab) fab.style.display = (rcPinned ? 'none' : 'flex');
-  }
-
-  function rcTogglePin() {
-    rcPinned = !rcPinned;
-    rcSave();
-    rcSyncPinUI();
-  }
-
   $('rc-back').addEventListener('click', rcCloseScreen);
   $('rc-count').addEventListener('click', rcIncrement);
   $('rc-reset').addEventListener('click', rcReset);
-  $('rc-pin-toggle').addEventListener('click', rcTogglePin);
-  $('rc-fab').addEventListener('click', rcOpenScreen);
-  $('rc-pin-count-btn').addEventListener('click', rcIncrement);
-  $('rc-pin-open-btn').addEventListener('click', rcOpenScreen);
+  $('nav-counter').addEventListener('click', rcOpenScreen);
 
   // ─── INIT ───
   rcLoad();
