@@ -1581,20 +1581,44 @@ button {
 /* ─────────────────────────────────────────
    ROW COUNTER FAB
 ───────────────────────────────────────── */
-/* ── Counter button in step nav ── */
-.nav-counter {
+/* ── Counter composite in step nav (info + plus) ── */
+.nav-counter-wrap {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+  flex-shrink: 0;
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 0.5px solid var(--glass-border);
+  box-shadow: 0 2px 12px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
+  overflow: hidden;
+}
+/* Left: tap to open full counter screen */
+.nav-counter-info {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 0 14px;
-  height: 52px;
-  flex-shrink: 0;
-  min-width: 56px;
-  transition: transform 100ms var(--ease-out), background 100ms var(--ease-out);
+  padding: 0 12px;
+  min-width: 54px;
+  cursor: pointer;
+  border-right: 0.5px solid var(--glass-border);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 100ms var(--ease-out);
 }
-.nav-counter:active { transform: scale(0.93); }
+.nav-counter-info:active { background: rgba(0,0,0,0.06); }
+@media (prefers-color-scheme: dark) {
+  .nav-counter-info:active { background: rgba(255,255,255,0.07); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .nav-counter-info:hover { background: rgba(0,0,0,0.03); }
+  @media (prefers-color-scheme: dark) {
+    .nav-counter-info:hover { background: rgba(255,255,255,0.04); }
+  }
+}
 .nav-counter-label {
   font-family: var(--font-mono);
   font-size: 9px;
@@ -1615,8 +1639,27 @@ button {
   text-align: center;
   user-select: none;
 }
+/* Right: tap to increment */
+.nav-counter-plus {
+  width: 44px;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 80ms var(--ease-out), transform 80ms var(--ease-out);
+  user-select: none;
+}
+.nav-counter-plus:active {
+  background: rgba(255,168,29,0.2);
+  transform: scale(0.85);
+}
 @media (hover: hover) and (pointer: fine) {
-  .nav-counter:hover .nav-counter-num { color: var(--accent); }
+  .nav-counter-plus:hover { background: rgba(255,168,29,0.09); }
 }
 
 /* ─────────────────────────────────────────
@@ -1950,10 +1993,13 @@ button {
     <button class="btn-glass nav-notes" id="nav-notes">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
     </button>
-    <button class="btn-glass nav-counter" id="nav-counter" aria-label="Open row counter">
-      <span class="nav-counter-label">Row</span>
-      <span class="nav-counter-num" id="nav-counter-num">0</span>
-    </button>
+    <div class="nav-counter-wrap">
+      <button class="nav-counter-info" id="nav-counter" aria-label="Open counter">
+        <span class="nav-counter-label">Counter</span>
+        <span class="nav-counter-num" id="nav-counter-num">0</span>
+      </button>
+      <button class="nav-counter-plus" id="nav-counter-plus" aria-label="+1">+</button>
+    </div>
     <button class="btn-glass btn-glass-amber nav-next" id="nav-next">Next Step</button>
   </div>
   <!-- Section picker overlay (mobile) -->
@@ -3716,6 +3762,7 @@ ${badJson}`;
   $('rc-count').addEventListener('click', rcIncrement);
   $('rc-reset').addEventListener('click', rcReset);
   $('nav-counter').addEventListener('click', rcOpenScreen);
+  $('nav-counter-plus').addEventListener('click', rcIncrement);
 
   // ─── INIT ───
   rcLoad();
