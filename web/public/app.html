@@ -1577,6 +1577,254 @@ button {
 @media (min-width: 1280px) {
   .screen { max-width: 720px; }
 }
+
+/* ─────────────────────────────────────────
+   CALCULATOR FAB
+───────────────────────────────────────── */
+.calc-fab {
+  position: fixed;
+  bottom: calc(112px + var(--safe-bottom));
+  right: 20px;
+  z-index: 200;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 1000px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 510;
+  color: var(--text-2);
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: 0 4px 24px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  animation: fabIn 220ms var(--ease-out) both;
+}
+@keyframes fabIn {
+  from { opacity: 0; transform: scale(0.92) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.calc-fab:active { transform: scale(0.95); }
+@media (hover: hover) and (pointer: fine) {
+  .calc-fab:hover { box-shadow: 0 6px 32px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .calc-fab { animation: none; }
+}
+
+/* ─────────────────────────────────────────
+   CALCULATOR SCREEN
+───────────────────────────────────────── */
+#screen-calc {
+  padding: calc(12px + var(--safe-top)) 16px calc(20px + var(--safe-bottom));
+  overflow: hidden;
+}
+
+.calc-shell {
+  flex: 1;
+  min-height: 0;
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 26px;
+  box-shadow: 0 10px 60px var(--glass-shadow), 0 0 0 0.5px var(--glass-inset) inset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeUp 260ms var(--ease-drawer);
+}
+
+.calc-header { flex-shrink: 0; padding: 0 20px; }
+
+.calc-grabber {
+  width: 36px; height: 5px;
+  background: var(--grabber);
+  border-radius: 3px;
+  margin: 10px auto 14px;
+}
+
+.calc-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.calc-title { font-family: var(--font-body); font-size: 24px; font-weight: 510; color: var(--text); }
+.calc-close-btn {
+  width: 36px; height: 36px; padding: 0; font-size: 20px; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Tab strip */
+.calc-tabs {
+  display: flex; gap: 4px;
+  padding: 4px;
+  background: var(--muted-fill);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.calc-tab {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  cursor: pointer; border: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+}
+.calc-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.calc-tab:not(.active):active { transform: scale(0.96); }
+
+/* Scrollable body */
+.calc-body {
+  flex: 1; min-height: 0;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 0 20px calc(24px + var(--safe-bottom));
+}
+
+/* Panels */
+.calc-panel { display: none; flex-direction: column; gap: 20px; }
+.calc-panel.active { display: flex; }
+
+/* Field groups */
+.calc-field-group { display: flex; flex-direction: column; gap: 10px; }
+
+.calc-group-label {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-3);
+  display: flex; align-items: center; gap: 6px;
+}
+.calc-optional {
+  font-family: var(--font-body);
+  font-size: 11px; letter-spacing: 0;
+  text-transform: none; color: var(--text-3); opacity: 0.7;
+}
+
+.calc-row-fields { display: flex; gap: 12px; align-items: flex-end; }
+
+.calc-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.calc-field-wide { flex: 1; }
+
+.calc-label { font-family: var(--font-body); font-size: 12px; color: var(--text-2); }
+
+.calc-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 0.5px solid var(--border-thin);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body); font-size: 17px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--motion-fast) var(--ease-out);
+  -moz-appearance: textfield;
+}
+.calc-input::-webkit-inner-spin-button,
+.calc-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.calc-input:focus { border-color: var(--accent); }
+
+/* Toggle (unit / direction) */
+.calc-toggle {
+  display: flex; gap: 2px;
+  padding: 3px;
+  background: var(--muted-fill);
+  border-radius: 9px;
+}
+.calc-toggle-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  cursor: pointer; border: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  white-space: nowrap;
+}
+.calc-toggle-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.calc-toggle-btn:not(.active):active { transform: scale(0.94); }
+
+/* Checkbox row */
+.calc-check-row { display: flex; align-items: center; }
+.calc-check-label {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  font-family: var(--font-body); font-size: 15px; color: var(--text-2);
+  user-select: none;
+}
+.calc-check {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  accent-color: var(--accent);
+  cursor: pointer; flex-shrink: 0;
+}
+
+/* Calculate button */
+.calc-go-btn { align-self: stretch; height: 50px; font-size: 16px; }
+
+/* Result area */
+.calc-result-area {
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.calc-answer {
+  font-family: var(--font-serif);
+  font-size: 22px; line-height: 1.35; color: var(--text);
+}
+.calc-detail {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.6; color: var(--text-2);
+}
+.calc-rounding {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.06em; color: var(--text-3);
+}
+.calc-plan-wrap {
+  border-top: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  padding-top: 10px; margin-top: 2px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.calc-plan-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.calc-plan-rows {
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--text-2); line-height: 1.7;
+}
+.calc-error {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.55; color: var(--text-2);
+  background: var(--muted-fill);
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 0.5px solid var(--border-med);
+}
+
+@media (min-width: 768px) {
+  #screen-calc { padding: 24px; justify-content: center; align-items: center; }
+  .calc-shell {
+    max-width: 560px; width: 100%;
+    max-height: 80vh; border-radius: 20px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 0 0 0.5px var(--glass-inset) inset;
+  }
+}
+@media (min-width: 1024px) {
+  .calc-shell { max-width: 580px; }
+}
 </style>
 </head>
 <body>
@@ -1772,6 +2020,116 @@ button {
   </div>
 </div>
 
+<!-- ── CALCULATORS ── -->
+<div id="screen-calc" class="screen">
+  <div class="calc-shell">
+    <div class="calc-header">
+      <div class="calc-grabber"></div>
+      <div class="calc-title-row">
+        <div class="calc-title">Tools</div>
+        <button class="btn-glass calc-close-btn" id="calc-close">&times;</button>
+      </div>
+      <div class="calc-tabs" role="tablist">
+        <button class="calc-tab active" id="calc-tab-caston" role="tab" aria-selected="true">Cast&#8209;on</button>
+        <button class="calc-tab" id="calc-tab-shaping" role="tab" aria-selected="false">Shaping</button>
+      </div>
+    </div>
+    <div class="calc-body">
+
+      <!-- CAST-ON PANEL -->
+      <div class="calc-panel active" id="calc-panel-caston" role="tabpanel">
+        <div class="calc-field-group">
+          <div class="calc-group-label">Gauge</div>
+          <div class="calc-row-fields">
+            <div class="calc-field">
+              <label class="calc-label" for="co-stitches">Stitches</label>
+              <input type="number" class="calc-input" id="co-stitches" min="1" max="999" placeholder="20" inputmode="decimal">
+            </div>
+            <div class="calc-field">
+              <label class="calc-label">Swatch</label>
+              <div class="calc-toggle" id="co-swatch-toggle">
+                <button class="calc-toggle-btn active" data-val="10cm">10 cm</button>
+                <button class="calc-toggle-btn" data-val="4in">4 in</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="calc-field-group">
+          <div class="calc-group-label">Target width</div>
+          <div class="calc-row-fields">
+            <div class="calc-field">
+              <label class="calc-label" for="co-width">Width</label>
+              <input type="number" class="calc-input" id="co-width" min="0.1" step="0.5" placeholder="40" inputmode="decimal">
+            </div>
+            <div class="calc-field">
+              <label class="calc-label">Unit</label>
+              <div class="calc-toggle" id="co-unit-toggle">
+                <button class="calc-toggle-btn active" data-val="cm">cm</button>
+                <button class="calc-toggle-btn" data-val="in">in</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="calc-field-group">
+          <div class="calc-group-label">Ease <span class="calc-optional">optional</span></div>
+          <div class="calc-row-fields">
+            <div class="calc-field calc-field-wide">
+              <label class="calc-label" for="co-ease">Add ease (in same unit as width)</label>
+              <input type="number" class="calc-input" id="co-ease" step="0.5" placeholder="0" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+        <button class="btn-glass btn-glass-amber calc-go-btn" id="co-go">Calculate</button>
+        <div class="calc-result-area" id="co-result" style="display:none"></div>
+      </div>
+
+      <!-- SHAPING PANEL -->
+      <div class="calc-panel" id="calc-panel-shaping" role="tabpanel">
+        <div class="calc-field-group">
+          <div class="calc-group-label">Shaping</div>
+          <div class="calc-row-fields">
+            <div class="calc-field">
+              <label class="calc-label" for="sh-total">Total stitches</label>
+              <input type="number" class="calc-input" id="sh-total" min="1" max="999" placeholder="24" inputmode="numeric">
+            </div>
+            <div class="calc-field">
+              <label class="calc-label">Direction</label>
+              <div class="calc-toggle" id="sh-dir-toggle">
+                <button class="calc-toggle-btn active" data-val="decrease">Dec</button>
+                <button class="calc-toggle-btn" data-val="increase">Inc</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="calc-field-group">
+          <div class="calc-group-label">Rows</div>
+          <div class="calc-row-fields">
+            <div class="calc-field calc-field-wide">
+              <label class="calc-label" for="sh-rows">Over how many rows</label>
+              <input type="number" class="calc-input" id="sh-rows" min="1" max="9999" placeholder="60" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+        <div class="calc-check-row">
+          <label class="calc-check-label">
+            <input type="checkbox" class="calc-check" id="sh-both-sides">
+            <span>Work both sides (2 stitches per shaping row)</span>
+          </label>
+        </div>
+        <button class="btn-glass btn-glass-amber calc-go-btn" id="sh-go">Calculate</button>
+        <div class="calc-result-area" id="sh-result" style="display:none"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── CALC FAB ── -->
+<button class="calc-fab" id="calc-fab" aria-label="Open calculators" style="display:none">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+  Tools
+</button>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script type="module">
 import {
@@ -1785,6 +2143,10 @@ window.__kw_filterSteps = _modFilterSteps;
 window.__kw_needsRepair = _modNeedsRepair;
 window.__kw_normalizeInput = _modNormalizeInput;
 window.dispatchEvent(new Event('kw-module-ready'));
+</script>
+<script type="module">
+import { calcCastOn, explainCastOn, calcShaping, explainShaping } from '/lib/knit-calculators.mjs';
+window.__kw_calc = { calcCastOn, explainCastOn, calcShaping, explainShaping };
 </script>
 <script>
 (function() {
@@ -2047,6 +2409,8 @@ EXAMPLE — Output steps (abbreviated):
       { duration: 180, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }
     );
     if (name === 'home') renderHome();
+    var fab = $('calc-fab');
+    if (fab) fab.style.display = (name === 'step') ? 'flex' : 'none';
   }
 
   // ─── HOME / LIBRARY ───
@@ -3363,6 +3727,202 @@ ${badJson}`;
   }
   syncThemeColor();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncThemeColor);
+
+  // ─── CALCULATORS ───
+  var calcReturnScreen = 'step';
+
+  function openCalcScreen() {
+    var active = document.querySelector('.screen.active');
+    calcReturnScreen = active ? active.id.replace('screen-', '') : 'step';
+    saveCalcInputs();
+    showScreen('calc');
+    var lastTab = localStorage.getItem('kw_calc_last_tab') || 'caston';
+    switchCalcTab(lastTab, false);
+    restoreCalcInputs();
+  }
+
+  function closeCalcScreen() {
+    saveCalcInputs();
+    showScreen(calcReturnScreen);
+  }
+
+  function switchCalcTab(tab, animate) {
+    document.querySelectorAll('.calc-tab').forEach(function(btn) {
+      var on = btn.id === 'calc-tab-' + tab;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.calc-panel').forEach(function(panel) {
+      panel.classList.toggle('active', panel.id === 'calc-panel-' + tab);
+    });
+    localStorage.setItem('kw_calc_last_tab', tab);
+  }
+
+  $('calc-tab-caston').addEventListener('click', function() { switchCalcTab('caston', true); });
+  $('calc-tab-shaping').addEventListener('click', function() { switchCalcTab('shaping', true); });
+  $('calc-close').addEventListener('click', closeCalcScreen);
+  $('calc-fab').addEventListener('click', openCalcScreen);
+
+  // ── Toggle helpers ──
+  function wireToggle(containerId) {
+    var container = $(containerId);
+    if (!container) return;
+    container.querySelectorAll('.calc-toggle-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        container.querySelectorAll('.calc-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+  }
+
+  function getToggleVal(containerId) {
+    var container = $(containerId);
+    if (!container) return null;
+    var active = container.querySelector('.calc-toggle-btn.active');
+    return active ? active.dataset.val : null;
+  }
+
+  function setToggleVal(containerId, val) {
+    var container = $(containerId);
+    if (!container) return;
+    container.querySelectorAll('.calc-toggle-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.val === val);
+    });
+  }
+
+  wireToggle('co-swatch-toggle');
+  wireToggle('co-unit-toggle');
+  wireToggle('sh-dir-toggle');
+
+  // ── Result renderer ──
+  function showResult(el, html) {
+    el.innerHTML = html;
+    el.style.display = '';
+    el.animate(
+      [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 220, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'forwards' }
+    );
+  }
+
+  // ── Cast-on ──
+  function runCastOn() {
+    var calc = window.__kw_calc;
+    var el = $('co-result');
+    if (!calc) {
+      showResult(el, '<div class="calc-error">Calculator not ready\u2014please try again in a moment.</div>');
+      return;
+    }
+    var stitches = parseFloat($('co-stitches').value);
+    var swatchVal = getToggleVal('co-swatch-toggle');
+    var width = parseFloat($('co-width').value);
+    var unitVal = getToggleVal('co-unit-toggle');
+    var ease = parseFloat($('co-ease').value) || 0;
+
+    var swatchSize = swatchVal === '4in' ? 4 : 10;
+    var swatchUnit = swatchVal === '4in' ? 'in' : 'cm';
+    var targetUnit = unitVal === 'in' ? 'in' : 'cm';
+
+    var inputs = { gaugeStitches: stitches, swatchSize: swatchSize, swatchUnit: swatchUnit, targetWidth: width, targetUnit: targetUnit, ease: ease };
+    var result = calc.calcCastOn(inputs);
+    var exp = calc.explainCastOn(inputs, result);
+
+    var html;
+    if (!result.valid) {
+      html = '<div class="calc-error">' + esc(exp.summary) + '</div>';
+    } else {
+      html = '<div class="calc-answer">' + esc(exp.summary) + '</div>' +
+             '<div class="calc-detail">' + esc(exp.detail) + '</div>';
+      if (exp.rounding) html += '<div class="calc-rounding">' + esc(exp.rounding) + '</div>';
+    }
+    showResult(el, html);
+    saveCalcInputs();
+  }
+
+  $('co-go').addEventListener('click', runCastOn);
+  ['co-stitches', 'co-width', 'co-ease'].forEach(function(id) {
+    $(id).addEventListener('keydown', function(e) { if (e.key === 'Enter') runCastOn(); });
+  });
+
+  // ── Shaping ──
+  function runShaping() {
+    var calc = window.__kw_calc;
+    var el = $('sh-result');
+    if (!calc) {
+      showResult(el, '<div class="calc-error">Calculator not ready\u2014please try again in a moment.</div>');
+      return;
+    }
+    var total = parseInt($('sh-total').value, 10);
+    var rows = parseInt($('sh-rows').value, 10);
+    var bothSides = $('sh-both-sides').checked;
+    var direction = getToggleVal('sh-dir-toggle');
+
+    var inputs = { totalShaping: total, overRows: rows, bothSides: bothSides, direction: direction };
+    var result = calc.calcShaping(inputs);
+    var exp = calc.explainShaping(inputs, result);
+
+    var html;
+    if (!result.valid) {
+      html = '<div class="calc-error">' + esc(exp.summary) + '</div>';
+    } else {
+      var rowList = exp.plan.map(function(r) { return 'Row\u00a0' + r; }).join(', ');
+      if (exp.planNote) rowList += '\u2026';
+      html = '<div class="calc-answer">' + esc(exp.summary) + '</div>' +
+             '<div class="calc-detail">' + esc(exp.detail) + '</div>';
+      if (exp.plan.length > 0) {
+        html += '<div class="calc-plan-wrap">' +
+                  '<div class="calc-plan-label">Row schedule</div>' +
+                  '<div class="calc-plan-rows">' + esc(rowList) + '</div>' +
+                  (exp.planNote ? '<div class="calc-rounding">' + esc(exp.planNote) + '</div>' : '') +
+                '</div>';
+      }
+    }
+    showResult(el, html);
+    saveCalcInputs();
+  }
+
+  $('sh-go').addEventListener('click', runShaping);
+  ['sh-total', 'sh-rows'].forEach(function(id) {
+    $(id).addEventListener('keydown', function(e) { if (e.key === 'Enter') runShaping(); });
+  });
+
+  // ── Persistence ──
+  function saveCalcInputs() {
+    try {
+      localStorage.setItem('kw_calc_caston', JSON.stringify({
+        stitches: $('co-stitches').value,
+        swatch:   getToggleVal('co-swatch-toggle'),
+        width:    $('co-width').value,
+        unit:     getToggleVal('co-unit-toggle'),
+        ease:     $('co-ease').value,
+      }));
+      localStorage.setItem('kw_calc_shaping', JSON.stringify({
+        total:     $('sh-total').value,
+        rows:      $('sh-rows').value,
+        bothSides: $('sh-both-sides').checked,
+        dir:       getToggleVal('sh-dir-toggle'),
+      }));
+    } catch(e) {}
+  }
+
+  function restoreCalcInputs() {
+    try {
+      var co = JSON.parse(localStorage.getItem('kw_calc_caston') || 'null');
+      if (co) {
+        if (co.stitches) $('co-stitches').value = co.stitches;
+        if (co.swatch)   setToggleVal('co-swatch-toggle', co.swatch);
+        if (co.width)    $('co-width').value = co.width;
+        if (co.unit)     setToggleVal('co-unit-toggle', co.unit);
+        if (co.ease)     $('co-ease').value = co.ease;
+      }
+      var sh = JSON.parse(localStorage.getItem('kw_calc_shaping') || 'null');
+      if (sh) {
+        if (sh.total)              $('sh-total').value = sh.total;
+        if (sh.rows)               $('sh-rows').value = sh.rows;
+        if (sh.bothSides != null)  $('sh-both-sides').checked = sh.bothSides;
+        if (sh.dir)                setToggleVal('sh-dir-toggle', sh.dir);
+      }
+    } catch(e) {}
+  }
 
   // ─── INIT ───
   renderHome();
