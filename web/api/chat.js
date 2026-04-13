@@ -1,4 +1,4 @@
-export const config = { maxDuration: 60 };
+export const config = { runtime: 'edge', maxDuration: 30 };
 
 const rateLimitMap = new Map();
 
