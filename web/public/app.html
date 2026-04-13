@@ -6,11 +6,19 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#f7f7f4">
 <title>KnitWise</title>
-<link href="https://fonts.googleapis.com/css2?family=Sometype+Mono&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Geist:wght@400;500;600;700&family=Digital+Numbers&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sometype+Mono&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ─────────────────────────────────────────
    LOCAL FONT FACES
 ───────────────────────────────────────── */
+@font-face {
+  font-family: 'Digital Numbers';
+  src: url('fonts/DigitalNumbers-Regular.woff') format('woff'),
+       url('fonts/DigitalNumbers-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
 @font-face {
   font-family: 'Apple Garamond';
   src: url('fonts/AppleGaramond-Light.ttf') format('truetype');
@@ -1773,7 +1781,7 @@ button {
   .rc-digit-cell::before { background: rgba(255,255,255,0.06); }
 }
 .rc-digit {
-  font-family: 'Digital Numbers', 'Courier New', monospace;
+  font-family: 'Digital Numbers', monospace;
   font-size: clamp(52px, 18vw, 88px);
   line-height: 1;
   color: #636363;
