@@ -1,7 +1,7 @@
 import { list } from '@vercel/blob';
 
 /** Node required: @vercel/blob uses Node streams (not Edge-compatible). */
-export const config = { runtime: 'nodejs', maxDuration: 15 };
+export const config = { maxDuration: 15 };
 
 /** Must match scripts/upload-landing-demos-to-blob.mjs */
 const PREFIX = 'knitwise/landing-demos/';
