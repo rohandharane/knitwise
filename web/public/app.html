@@ -66,6 +66,7 @@
    RESET & CUSTOM PROPERTIES
 ───────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
 :root {
   --bg:          #f7f7f4;
@@ -313,7 +314,7 @@ button {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 .home-card-title {
   font-family: var(--font-body);
@@ -322,6 +323,13 @@ button {
   color: var(--text);
   line-height: 1.3;
   flex: 1;
+  text-wrap: balance;
+}
+.home-card-top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 .home-card-size {
   font-family: var(--font-mono);
@@ -331,8 +339,7 @@ button {
   color: var(--text-3);
   background: var(--muted-fill);
   border-radius: 6px;
-  padding: 3px 8px;
-  flex-shrink: 0;
+  padding: 4px 9px;
   white-space: nowrap;
 }
 .home-card-progress-row {
@@ -358,6 +365,7 @@ button {
   font-size: 11px;
   color: var(--text-3);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .home-card-time {
   font-family: var(--font-body);
@@ -365,23 +373,26 @@ button {
   color: var(--text-3);
 }
 .home-card-delete {
-  position: absolute;
-  top: 8px; right: 8px;
-  width: 28px; height: 28px;
+  /* 40×40 hit area, 28×28 visual — meets minimum hit area rule */
+  width: 40px; height: 40px;
+  margin: -8px -8px -8px 0;
   border-radius: 50%;
-  font-size: 16px;
   color: var(--text-3);
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.5;
-  transition: opacity var(--motion-fast) var(--ease-out), background var(--motion-fast) var(--ease-out), transform var(--motion-fast) var(--ease-out);
+  flex-shrink: 0;
+  opacity: 0.45;
+  transition: opacity var(--motion-fast) var(--ease-out),
+              background var(--motion-fast) var(--ease-out),
+              transform var(--motion-fast) var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .home-card-delete { opacity: 0; }
   .home-card:hover .home-card-delete { opacity: 1; }
 }
-.home-card-delete:active { background: var(--muted-fill); transform: scale(0.95); }
+.home-card-delete:active { background: var(--muted-fill); transform: scale(0.88); }
+.home-card-delete svg { display: block; width: 12px; height: 12px; }
 
 .home-empty {
   flex: 1;
@@ -2422,14 +2433,18 @@ EXAMPLE — Output steps (abbreviated):
       card.innerHTML =
         '<div class="home-card-top">' +
           '<div class="home-card-title">' + esc(item.title || 'Untitled') + '</div>' +
-          (item.sizeLabel ? '<div class="home-card-size">' + esc(item.sizeLabel) + '</div>' : '') +
+          '<div class="home-card-top-right">' +
+            (item.sizeLabel ? '<div class="home-card-size">' + esc(item.sizeLabel) + '</div>' : '') +
+            '<button class="home-card-delete" data-id="' + item.id + '" aria-label="Delete pattern">' +
+              '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>' +
+            '</button>' +
+          '</div>' +
         '</div>' +
         '<div class="home-card-progress-row">' +
           '<div class="home-card-progress-track"><div class="home-card-progress-fill" style="width:' + pct + '%"></div></div>' +
           '<div class="home-card-step">Step ' + (item.currentStep + 1) + ' of ' + item.totalSteps + '</div>' +
         '</div>' +
-        '<div class="home-card-time">' + relativeTime(item.lastOpenedAt) + '</div>' +
-        '<button class="home-card-delete" data-id="' + item.id + '" title="Delete">&times;</button>';
+        '<div class="home-card-time">' + relativeTime(item.lastOpenedAt) + '</div>';
 
       card.addEventListener('click', function(e) {
         if (e.target.closest('.home-card-delete')) return;
