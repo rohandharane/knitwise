@@ -70,8 +70,8 @@
 :root {
   --bg:          #f7f7f4;
   --surface:     #ffffff;
-  --border-thin: #888787;
-  --border-med:  #ddd;
+  --border-thin: #d7d7d7;
+  --border-med:  #e4e4e4;
   --accent:      #ffa81d;
   --text:        #000000;
   --text-2:      #5b5b5b;
@@ -123,8 +123,8 @@
   :root {
     --bg:          #1a1a1a;
     --surface:     #2a2a2a;
-    --border-thin: #444;
-    --border-med:  #3a3a3a;
+    --border-thin: #333;
+    --border-med:  #2e2e2e;
     --accent:      #ffb940;
     --text:        #e8e8e6;
     --text-2:      #a0a0a0;
@@ -442,6 +442,7 @@ button {
   position: absolute;
   top: calc(16px + var(--safe-top));
   left: 20px;
+  display: flex; align-items: center; gap: 5px;
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--accent);
@@ -475,7 +476,7 @@ button {
   width: 100%;
   max-width: 400px;
   background: var(--surface);
-  border: 0.4px solid var(--border-thin);
+  border: 1px solid var(--border-thin);
   border-radius: 12px;
   padding: 40px 24px;
   display: flex;
@@ -499,8 +500,11 @@ button {
 
 .drop-icon {
   width: 48px; height: 48px; border-radius: 12px;
-  border: 0.4px solid var(--border-thin);
+  border: 1px solid rgba(0,0,0,0.12);
   display: flex; align-items: center; justify-content: center;
+}
+@media (prefers-color-scheme: dark) {
+  .drop-icon { border-color: rgba(255,255,255,0.12); }
 }
 .drop-icon svg { width: 22px; height: 22px; color: var(--text-3); }
 
@@ -604,7 +608,7 @@ button {
 .paste-area textarea {
   width: 100%; min-height: 120px; max-height: 180px;
   padding: 14px;
-  border: 0.4px solid var(--border-thin);
+  border: 1px solid var(--border-thin);
   border-radius: 12px; background: var(--surface);
   color: var(--text); font-family: var(--font-serif);
   font-size: 16px; line-height: 1.6; resize: none; outline: none;
@@ -732,7 +736,7 @@ button {
 }
 .sp-card {
   flex: 1;
-  border: 0.4px solid var(--border-thin);
+  border: 1px solid var(--border-thin);
   border-radius: 12px;
   background: var(--surface);
   display: flex; flex-direction: column;
@@ -777,6 +781,7 @@ button {
   position: absolute;
   top: calc(16px + var(--safe-top));
   left: 20px;
+  display: flex; align-items: center; gap: 5px;
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--accent);
@@ -816,7 +821,7 @@ button {
   text-transform: uppercase;
   padding: 5px 12px; border-radius: 10px;
   background: var(--surface);
-  border: 0.4px solid var(--border-thin);
+  border: 1px solid var(--border-thin);
   color: var(--text);
   flex-shrink: 0;
 }
@@ -1017,7 +1022,7 @@ button {
 .repeat-block {
   margin-top: 24px;
   background: var(--surface);
-  border: 0.4px solid var(--border-thin);
+  border: 1px solid var(--border-thin);
   border-radius: 12px;
   padding: 18px 20px; display: none;
 }
@@ -1722,6 +1727,7 @@ button {
   margin-bottom: 0;
 }
 .rc-back-btn {
+  display: flex; align-items: center; gap: 5px;
   font-family: var(--font-body);
   font-size: 15px; color: var(--accent);
   padding: 6px 12px; border-radius: 8px;
@@ -1905,7 +1911,7 @@ button {
 
 <!-- ── UPLOAD ── -->
 <div id="screen-upload" class="screen">
-  <button class="upload-back-btn" id="upload-back">&larr; Library</button>
+  <button class="upload-back-btn" id="upload-back"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1L1 6L6 11"/></svg>Library</button>
   <div class="upload-title">Knitwise</div>
   <div class="upload-sub">Upload a pattern. We'll turn it into one step at a time.</div>
   <div class="drop-zone" id="drop-zone">
@@ -1977,7 +1983,7 @@ button {
 <div id="screen-step" class="screen">
   <!-- Desktop section sidebar -->
   <nav class="section-sidebar" id="section-sidebar" aria-label="Pattern sections"></nav>
-  <button class="step-back-btn" id="topbar-back">&larr; Library</button>
+  <button class="step-back-btn" id="topbar-back"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1L1 6L6 11"/></svg>Library</button>
   <div class="step-topbar">
     <div class="topbar-pattern" id="topbar-pattern"></div>
     <div class="topbar-size-chip" id="size-chip"></div>
@@ -2011,7 +2017,7 @@ button {
     <img id="ref-lightbox-img" src="" alt="Pattern reference page">
   </div>
   <div class="step-nav">
-    <button class="btn-glass nav-prev" id="nav-prev" disabled>&#8592;</button>
+    <button class="btn-glass nav-prev" id="nav-prev" disabled><svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1L1 6L6 11"/></svg></button>
     <button class="btn-glass nav-notes" id="nav-notes">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
     </button>
@@ -2085,7 +2091,7 @@ button {
     <div class="rc-header">
       <div class="rc-grabber"></div>
       <div class="rc-title-row">
-        <button class="rc-back-btn" id="rc-back">&#8592; Steps</button>
+        <button class="rc-back-btn" id="rc-back"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1L1 6L6 11"/></svg>Steps</button>
         <span class="rc-screen-title">Counter</span>
       </div>
     </div>
