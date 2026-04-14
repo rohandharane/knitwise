@@ -1670,6 +1670,20 @@ button {
   .nav-counter-plus:hover { background: rgba(255,168,29,0.09); }
 }
 
+/* ── Mobile: compact counter — hide label, tighten sizing ── */
+@media (max-width: 479px) {
+  /* Slim down the fixed-width nav buttons so Next Step gets room */
+  .nav-prev  { width: 46px; }
+  .nav-notes { width: 46px; }
+
+  /* Counter: drop the text label, shrink padding */
+  .nav-counter-label { display: none; }
+  .nav-counter-num   { font-size: 18px; }
+  .nav-counter-info  { padding: 0 10px; min-width: 36px; }
+  .nav-counter-plus  { width: 38px; font-size: 20px; }
+  .nav-counter-wrap  { border-radius: 1000px; }
+}
+
 /* ─────────────────────────────────────────
    ROW COUNTER SCREEN
 ───────────────────────────────────────── */
